@@ -1,0 +1,12 @@
+fileFormatVersion: 2
+guid: 14a788a11b30de642ad8c7f8566294ec
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures:
+  - _AudioLink: {instanceID: 0}
+  - _NoteArray: {fileID: -7639397621201060638, guid: 4d4121af358cc964aa2f53009b25ef56,
+      type: 3}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
