@@ -38,6 +38,10 @@ namespace _3.Editor
             EditorGUIUtility.labelWidth = 0;
         }
 
+        private void OnEnable()
+        {
+            GetSelectedMaterial();
+        }
         private void OnProjectChange()
         {
             GetSelectedMaterial();
@@ -56,10 +60,6 @@ namespace _3.Editor
         }
 
         [MenuItem("Tools/3/Migrate Materials to lit")]
-        private void OnWindowEnable()
-        {
-            GetSelectedMaterial();
-        }
 
         private void GetSelectedMaterial()
         {
