@@ -12,6 +12,11 @@ namespace _3.Editor
         private SerializedObject serializedObject;
         private Shader yourShader;
 
+        private void OnEnable()
+        {
+            GetSelectedMaterial();
+        }
+
         private void OnGUI()
         {
             EditorGUIUtility.labelWidth = 200f;
@@ -38,10 +43,6 @@ namespace _3.Editor
             EditorGUIUtility.labelWidth = 0;
         }
 
-        private void OnEnable()
-        {
-            GetSelectedMaterial();
-        }
         private void OnProjectChange()
         {
             GetSelectedMaterial();
@@ -60,7 +61,6 @@ namespace _3.Editor
         }
 
         [MenuItem("Tools/3/Migrate Materials to lit")]
-
         private void GetSelectedMaterial()
         {
             selectedMaterial = Selection.activeObject as Material;
