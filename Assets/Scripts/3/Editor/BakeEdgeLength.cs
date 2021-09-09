@@ -1,4 +1,10 @@
-﻿using System.IO;
+﻿// Code by 3, Razgriz
+// based on
+// https://forum.unity.com/threads/beyond-wrinkle-maps-to-realtime-tension-maps-current-state-of-the-unity-possibilities.509473/#post-5202389
+// https://github.com/ted10401/GeometryShaderCookbook
+// https://github.com/Xiexe/Unity-Lit-Shader-Templates/tree/refactor
+
+using System.IO;
 using UnityEditor;
 using UnityEngine;
 
@@ -21,22 +27,28 @@ namespace _3.Editor
             var verts = mesh.vertices;
             var triangles = mesh.GetTriangles(0);
             var triCount = triangles.Length / 3;
-            var triangleLengthTexture = new Texture2D(triCount, 1, TextureFormat.ARGB32, true)
+
+            var texSize = Mathf.NextPowerOfTwo((int) Mathf.Sqrt(triCount));
+
+            //var triangleLengthTexture = new Texture2D(texSize, texSize, TextureFormat.ARGB32, true)
+            var triangleLengthTexture = new Texture2D(texSize, texSize, TextureFormat.ARGB32, true)
             {
                 filterMode = FilterMode.Point,
                 wrapMode = TextureWrapMode.Clamp
             };
-            var texSize = Mathf.NextPowerOfTwo((int) Mathf.Sqrt(triCount));
+
 
             for (var x = 0; x < texSize; x++)
             for (var y = 0; y < texSize; y++)
             {
-                var l =
-                    (verts[triangles[x * 3]] - verts[triangles[x * 3 + 1]]).magnitude
-                    + (verts[triangles[x * 3 + 1]] - verts[triangles[x * 3 + 2]]).magnitude
-                    + (verts[triangles[x * 3 + 2]] - verts[triangles[x * 3]]).magnitude;
-                triangleLengthTexture.SetPixel(x, y, Color.white * l);
-                if ((y + 1) * texSize + x > triCount) triangleLengthTexture.SetPixel(x, y, Color.black);
+                if ((y - 1) * texSize + x > triCount) //triangleLengthTexture.SetPixel(x, y, Color.black);
+                    break;
+
+                var l = (verts[triangles[x * 3]] - verts[triangles[x * 3 + 1]]).magnitude +
+                        (verts[triangles[x * 3 + 1]] - verts[triangles[x * 3 + 2]]).magnitude +
+                        (verts[triangles[x * 3 + 2]] - verts[triangles[x * 3]]).magnitude;
+
+                triangleLengthTexture.SetPixel(x, texSize - y, Color.white * l);
             }
 
             triangleLengthTexture.Apply();
