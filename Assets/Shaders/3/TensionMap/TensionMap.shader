@@ -1,4 +1,4 @@
-Shader "Razgriz/TensionMap"
+Shader "3/TensionMap"
 {
     Properties
     {
