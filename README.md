@@ -6,7 +6,7 @@ ChangeMaterial.cs allows you to change materials to a different shader without c
 
 ShaderPreProcessor.cs removes Post Processing shaders (since they are provided) and unused passes from shaders before uploading reducing build size and build time
 
-BakeEdgeLength.cs allows you to bake a SkinnedMeshRenderers Edge Lengths to a texture for use with TensionMap.Shader (WIP)
+BakeEdgeLength.cs (WIP) allows you to bake a SkinnedMeshRenderers Edge Lengths to a texture for use with TensionMap.Shader
 
 
 Shaders:
