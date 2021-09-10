@@ -8,7 +8,7 @@
 // Based on method and code by MrArcher on the Unity Forums (Thanks!)
 // Requires BakeEdgeLength.cs to bake edge length data
 
-Shader "Razgriz/TensionMap"
+Shader "3/TensionMap"
 {
 Properties
 {
@@ -27,7 +27,6 @@ _POTTexSize                     ("Tri Length Buffer Texture Size", int)         
 SubShader
 {
     Tags { "RenderType"="Opaque" }
-    LOD 100
 
     Pass
     {
