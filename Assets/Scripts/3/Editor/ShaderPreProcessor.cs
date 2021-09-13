@@ -23,7 +23,7 @@ namespace _3.Editor
         {
             if (pts.Contains(p_snippet.passType))
             {
-                Debug.Log($"Consumed {p_shader.name} = {p_snippet.passType} = {p_snippet.passName}");
+                //Debug.Log($"Consumed {p_shader.name} = {p_snippet.passType} = {p_snippet.passName}");
                 p_data.Clear();
                 return;
             }
@@ -32,7 +32,7 @@ namespace _3.Editor
             shaderName = string.IsNullOrEmpty(shaderName) ? "Empty" : shaderName;
             if (shaderName.Contains("Hidden/PostProcessing"))
             {
-                Debug.Log($"Consumed {p_shader.name}");
+                //Debug.Log($"Consumed {p_shader.name}");
                 p_data.Clear();
             }
         }
