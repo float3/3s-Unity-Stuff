@@ -355,9 +355,16 @@ Shader "3/TMP_SDF/Billboarding"
                 vert.x += _VertexOffsetX;
                 vert.y += _VertexOffsetY;
 
-                float4 vPosition = UnityObjectToClipPos(vert);
+                //float4 vPosition = UnityObjectToClipPos(vert);
 
-                float2 pixelSize = vPosition.w;
+                // billboard mesh towards camera
+                float3 vpos = mul((float3x3)unity_ObjectToWorld, input.position.xyz);
+                float4 worldCoord = float4(unity_ObjectToWorld._m03, unity_ObjectToWorld._m13, unity_ObjectToWorld._m23,1);
+                float4 viewPos = mul(UNITY_MATRIX_V, worldCoord) + float4(vpos, 0);
+                float4 outPos = mul(UNITY_MATRIX_P, viewPos);
+
+
+                float2 pixelSize = outPos.w;
                 pixelSize /= float2(_ScaleX, _ScaleY) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
                 float scale = rsqrt(dot(pixelSize, pixelSize));
                 scale *= abs(input.texcoord1.y) * _GradientScale * (_Sharpness + 1);
@@ -401,12 +408,6 @@ Shader "3/TMP_SDF/Billboarding"
                 float2 outlineUV = TRANSFORM_TEX(textureUV, _OutlineTex);
 
 
-                // billboard mesh towards camera
-                float3 vpos = mul((float3x3)unity_ObjectToWorld, input.position.xyz);
-                float4 worldCoord = float4(unity_ObjectToWorld._m03, unity_ObjectToWorld._m13, unity_ObjectToWorld._m23,
-                                           1);
-                float4 viewPos = mul(UNITY_MATRIX_V, worldCoord) + float4(vpos, 0);
-                float4 outPos = mul(UNITY_MATRIX_P, viewPos);
 
                 output.position = outPos;
                 output.color = input.color;
