@@ -77,7 +77,7 @@ namespace _3.Editor
                 if (mat != null)
                 {
                     MigrateMaterial(mat, p_shader);
-                    Debug.Log("debug");
+                    //Debug.Log("debug");
                 }
             }
         }
