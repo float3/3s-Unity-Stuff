@@ -105,7 +105,7 @@ namespace _3.Editor
 
 			var outColor = new Color32(r, g, b, a);
 
-			Debug.Log(string.Format("Tri Edge: {0} Color: {1}", p_distance, outColor));
+			//Debug.Log(string.Format("Tri Edge: {0} Color: {1}", p_distance, outColor));
 
 			return outColor;
 		}

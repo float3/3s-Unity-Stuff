@@ -126,8 +126,7 @@ Shader "3/Sprites/BillboardAdditive"
 
                 // billboard mesh towards camera
                 float3 vpos = mul((float3x3)unity_ObjectToWorld, IN.vertex.xyz);
-                float4 worldCoord = float4(unity_ObjectToWorld._m03, unity_ObjectToWorld._m13, unity_ObjectToWorld._m23,
-                                           1);
+                float4 worldCoord = float4(unity_ObjectToWorld._m03, unity_ObjectToWorld._m13, unity_ObjectToWorld._m23,1);
                 float4 viewPos = mul(UNITY_MATRIX_V, worldCoord) + float4(vpos, 0);
                 float4 outPos = mul(UNITY_MATRIX_P, viewPos);
 
