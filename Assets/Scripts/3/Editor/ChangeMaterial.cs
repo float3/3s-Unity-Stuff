@@ -75,10 +75,8 @@ namespace _3.Editor
 			{
 				var mat = obj as Material;
 				if (mat != null)
-				{
 					MigrateMaterial(mat, p_shader);
-					//Debug.Log("debug");
-				}
+				//Debug.Log("debug");
 			}
 		}
 
