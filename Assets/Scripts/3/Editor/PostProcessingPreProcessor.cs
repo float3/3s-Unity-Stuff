@@ -13,12 +13,11 @@ namespace _3.Editor
 		public int callbackOrder { get { return 0; } }
 		public void OnPreprocessBuild(BuildReport report)
 		{
-			public string path = string(Application.dataPath - @"/Assets");
-
 			path += @"/Library/PackageCache/com.unity.postprocessing@3.1.1/PostProcessing";
-			Directory.Delete(path + @"/Textures");
-			Directory.Delete(path + @"/Shaders");
-			Console.Log("path");
+			Directory.Delete(Path.GetFullPath("Packges/com.unity.postprocessing@3.1.1/PostProcessing/Shaders"));
+			Directory.Delete(Path.GetFullPath("Packages/com.unity.postprocessing@3.1.1/PostProcessing/Textures"));
+			Directory.Delete(Path.GetFullPath("Library/PackageCache/com.unity.postprocessing@3.1.1/PostProcessing/Shaders"));
+			Directory.Delete(Path.GetFullPath("Library/PackageCache/com.unity.postprocessing@3.1.1/PostProcessing/Textures"));
 		}
 	}	
 }
