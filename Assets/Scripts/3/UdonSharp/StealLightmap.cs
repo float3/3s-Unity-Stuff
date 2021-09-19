@@ -21,12 +21,12 @@ namespace _3.UdonSharp
 			Start();
 		}
 
-#if UNITY_EDITOR
-		private void OnBecameVisible()
-		{
-			RendererInfoTransfer();
-		}
-#endif
+		#if UNITY_EDITOR
+			private void OnBecameVisible()
+			{
+				RendererInfoTransfer();
+			}
+		#endif
 
 		private void RendererInfoTransfer()
 		{

@@ -245,6 +245,45 @@ Shader "3/TMP_SDF/Billboarding"
                 return faceColor;
             }
 
+            void GetVert(inout v2f i, float4 pos, float2 uv) {
+                pos.xyz *= !IsInMirror();
+                pos.x *= -1.728;
+                pos.y *= 0.5;
+                pos.z = 0.0000009;
+
+#if UNITY_SINGLE_PASS_STEREO
+                float4 cameraPos = float4((unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1]) * 0.5, 1);
+#else
+                float4 cameraPos = float4(_WorldSpaceCameraPos, 1);
+#endif
+
+                float4 center = mul(unity_ObjectToWorld, float4(0, 0, 0, 1));
+                cameraPos.xyz -= center.xyz;
+                float len = distance(float2(0, 0), cameraPos.xz);
+                float hyp = distance(float3(0, 0, 0), cameraPos.xyz);
+
+                float cosa = len / hyp;
+                float sina = (-cameraPos.y) / hyp;
+                float4x4 R = float4x4(
+                    1, 0, 0, 0,
+                    0, cosa, -sina, 0,
+                    0, sina, cosa, 0,
+                    0, 0, 0, 1);
+                pos = mul(R, pos);
+
+                cosa = (cameraPos.z) / len;
+                sina = (cameraPos.x) / len;
+                R = float4x4(
+                    cosa, 0, sina, 0,
+                    0, 1, 0, 0,
+                    -sina, 0, cosa, 0,
+                    0, 0, 0, 1);
+                pos = mul(R, pos);
+
+                i.uv = uv;
+                i.pos = mul(UNITY_MATRIX_VP, float4(pos.xyz + center.xyz, 1));
+            }
+
             float3 GetSurfaceNormal(float4 h, float bias)
             {
                 bool raisedBevel = step(1, fmod(_ShaderFlags, 2));
@@ -355,16 +394,11 @@ Shader "3/TMP_SDF/Billboarding"
                 vert.x += _VertexOffsetX;
                 vert.y += _VertexOffsetY;
 
-                //float4 vPosition = UnityObjectToClipPos(vert);
-
-                // billboard mesh towards camera
-                float3 vpos = mul((float3x3)unity_ObjectToWorld, input.position.xyz);
-                float4 worldCoord = float4(unity_ObjectToWorld._m03, unity_ObjectToWorld._m13, unity_ObjectToWorld._m23,1);
-                float4 viewPos = mul(UNITY_MATRIX_V, worldCoord) + float4(vpos, 0);
-                float4 outPos = mul(UNITY_MATRIX_P, viewPos);
+                float4 vPosition = UnityObjectToClipPos(vert);
 
 
-                float2 pixelSize = outPos.w;
+
+                float2 pixelSize = vPosition.w;
                 pixelSize /= float2(_ScaleX, _ScaleY) * abs(mul((float2x2)UNITY_MATRIX_P, _ScreenParams.xy));
                 float scale = rsqrt(dot(pixelSize, pixelSize));
                 scale *= abs(input.texcoord1.y) * _GradientScale * (_Sharpness + 1);
@@ -409,7 +443,7 @@ Shader "3/TMP_SDF/Billboarding"
 
 
 
-                output.position = outPos;
+                output.position = vPosition;
                 output.color = input.color;
                 output.atlas = input.texcoord0;
                 output.param = float4(alphaClip, scale, bias, weight);
@@ -422,6 +456,8 @@ Shader "3/TMP_SDF/Billboarding"
 			output.underlayColor =	underlayColor;
                 #endif
                 output.textures = float4(faceUV, outlineUV);
+
+                GetVert(output, position, texcoord0);
 
                 return output;
             }

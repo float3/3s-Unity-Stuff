@@ -4,7 +4,6 @@ using System.Linq;
 using UnityEditor.Build;
 using UnityEditor.Rendering;
 using UnityEngine;
-using UnityEngine.Rendering;
 
 // thank you Scruffy and z3y
 
@@ -17,7 +16,7 @@ namespace _3.Editor
 			PassType.Deferred, PassType.LightPrePassBase, PassType.LightPrePassFinal, PassType.VertexLM, PassType.Meta
 		};
 
-		public int callbackOrder => 1;
+		public int callbackOrder { get { return 0; } }
 
 		public void OnProcessShader(Shader p_shader, ShaderSnippetData p_snippet, IList<ShaderCompilerData> p_data)
 		{
