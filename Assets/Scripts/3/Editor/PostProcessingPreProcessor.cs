@@ -18,7 +18,7 @@ namespace _3.Editor
 			path += @"/Library/PackageCache/com.unity.postprocessing@3.1.1/PostProcessing";
 			Directory.Delete(path + @"/Textures");
 			Directory.Delete(path + @"/Shaders");
-			Console.Log("path");
+			Debug.Log("path");
 		}
 	}	
 }
