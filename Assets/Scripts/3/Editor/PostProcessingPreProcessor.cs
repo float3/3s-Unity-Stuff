@@ -1,5 +1,6 @@
-#if UNITY_EDITOR
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using UnityEditor.Build;
 using UnityEditor.Rendering;
@@ -19,17 +20,17 @@ namespace _3.Editor
 				Directory.Delete(Path.GetFullPath("Packages/com.unity.postprocessing@3.1.1/PostProcessing/Shaders"));
 				Directory.Delete(Path.GetFullPath("Packages/com.unity.postprocessing@3.1.1/PostProcessing/Textures"));
 			}
-			catch(IOException e) 
+			catch (IOException e)
 			{
 				Debug.Log("IOException");
 				Debug.Log(e);
 			}
-			catch(UnauthorizedAccessException e)
+			catch (UnauthorizedAccessException e)
 			{
 				Debug.Log("UnauthorizedAccessException");
 				Debug.Log(e);
 			}
-			catch(DirectoryNotFoundException e)
+			catch (DirectoryNotFoundException e)
 			{
 				Debug.Log("DirectoryNotFoundException");
 				Debug.Log(e);
@@ -41,21 +42,21 @@ namespace _3.Editor
 				Directory.Delete(Path.GetFullPath("Library/PackageCache/com.unity.postprocessing@3.1.1/PostProcessing/Shaders"));
 				Directory.Delete(Path.GetFullPath("Library/PackageCache/com.unity.postprocessing@3.1.1/PostProcessing/Textures"));
 			}
-			catch(IOException e) 
+			catch (IOException e)
 			{
 				Debug.Log("IOException");
 				Debug.Log(e);
 			}
-			catch(UnauthorizedAccessException e)
+			catch (UnauthorizedAccessException e)
 			{
 				Debug.Log("UnauthorizedAccessException");
 				Debug.Log(e);
 			}
-			catch(DirectoryNotFoundException e)
+			catch (DirectoryNotFoundException e)
 			{
 				Debug.Log("DirectoryNotFoundException");
 				Debug.Log(e);
 			}
-	}	
+		}
+	}
 }
-#endif
