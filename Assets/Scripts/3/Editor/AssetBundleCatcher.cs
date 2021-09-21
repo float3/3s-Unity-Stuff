@@ -29,8 +29,8 @@ namespace _3.Editor
 
 				string id = pipelineManager.blueprintId;
 
-				int version =
-					string targetPath = GetVRChatCacheFullLocation(id, int version);
+				int version = ;
+				string targetPath = GetVRChatCacheFullLocation(id, int version);
 
 				string sourceFile = System.IO.Path.Combine(sourcePath, fileName);
 				string destFile = System.IO.Path.Combine(targetPath, fileName);
