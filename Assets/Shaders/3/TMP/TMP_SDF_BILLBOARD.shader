@@ -245,45 +245,6 @@ Shader "3/TMP_SDF/Billboarding"
                 return faceColor;
             }
 
-            void GetVert(inout v2f i, float4 pos, float2 uv) {
-                pos.xyz *= !IsInMirror();
-                pos.x *= -1.728;
-                pos.y *= 0.5;
-                pos.z = 0.0000009;
-
-#if UNITY_SINGLE_PASS_STEREO
-                float4 cameraPos = float4((unity_StereoWorldSpaceCameraPos[0] + unity_StereoWorldSpaceCameraPos[1]) * 0.5, 1);
-#else
-                float4 cameraPos = float4(_WorldSpaceCameraPos, 1);
-#endif
-
-                float4 center = mul(unity_ObjectToWorld, float4(0, 0, 0, 1));
-                cameraPos.xyz -= center.xyz;
-                float len = distance(float2(0, 0), cameraPos.xz);
-                float hyp = distance(float3(0, 0, 0), cameraPos.xyz);
-
-                float cosa = len / hyp;
-                float sina = (-cameraPos.y) / hyp;
-                float4x4 R = float4x4(
-                    1, 0, 0, 0,
-                    0, cosa, -sina, 0,
-                    0, sina, cosa, 0,
-                    0, 0, 0, 1);
-                pos = mul(R, pos);
-
-                cosa = (cameraPos.z) / len;
-                sina = (cameraPos.x) / len;
-                R = float4x4(
-                    cosa, 0, sina, 0,
-                    0, 1, 0, 0,
-                    -sina, 0, cosa, 0,
-                    0, 0, 0, 1);
-                pos = mul(R, pos);
-
-                i.uv = uv;
-                i.pos = mul(UNITY_MATRIX_VP, float4(pos.xyz + center.xyz, 1));
-            }
-
             float3 GetSurfaceNormal(float4 h, float bias)
             {
                 bool raisedBevel = step(1, fmod(_ShaderFlags, 2));
@@ -443,6 +404,7 @@ Shader "3/TMP_SDF/Billboarding"
 
 
 
+                output.position = UnityObjectToClipPos(input.position);
                 output.position = vPosition;
                 output.color = input.color;
                 output.atlas = input.texcoord0;
@@ -456,8 +418,6 @@ Shader "3/TMP_SDF/Billboarding"
 			output.underlayColor =	underlayColor;
                 #endif
                 output.textures = float4(faceUV, outlineUV);
-
-                GetVert(output, position, texcoord0);
 
                 return output;
             }

@@ -1,38 +1,46 @@
 ﻿#if UNITY_EDITOR
+
+#region
+
 using System.Collections.Generic;
 using System.Linq;
 using UnityEditor.Build;
 using UnityEditor.Rendering;
 using UnityEngine;
+using UnityEngine.Rendering;
+
+#endregion
 
 // thank you Scruffy and z3y
 
 namespace _3.Editor
 {
-	internal class ShaderPreProcessor : IPreprocessShaders
+	internal class AutoLockOnBuild : IPreprocessShaders
 	{
-		private readonly PassType[] pts =
+		public PassType[] pts =
 		{
-			PassType.Deferred, PassType.LightPrePassBase, PassType.LightPrePassFinal, PassType.VertexLM, PassType.Meta
+			PassType.Deferred, PassType.LightPrePassBase, PassType.LightPrePassFinal, PassType.VertexLM, PassType.Meta,
+			PassType.MotionVectors, PassType.ScriptableRenderPipeline, PassType.ScriptableRenderPipelineDefaultUnlit
 		};
 
-		public int callbackOrder { get { return 0; } }
+		public int callbackOrder => 3;
 
-		public void OnProcessShader(Shader p_shader, ShaderSnippetData p_snippet, IList<ShaderCompilerData> p_data)
+		public void OnProcessShader(Shader shader, ShaderSnippetData snippet, IList<ShaderCompilerData> data)
 		{
-			if (pts.Contains(p_snippet.passType))
+			if (pts.Contains(snippet.passType))
 			{
-				//Debug.Log($"Consumed {p_shader.name} = {p_snippet.passType} = {p_snippet.passName}");
-				p_data.Clear();
+				//Debug.Log($"Consumed {shader.name} = {snippet.passType} = {snippet.passName}");
+				data.Clear();
 				return;
 			}
 
-			var shaderName = p_shader.name;
+			var shaderName = shader.name;
 			shaderName = string.IsNullOrEmpty(shaderName) ? "Empty" : shaderName;
 			if (shaderName.Contains("Hidden/PostProcessing"))
-				//Debug.Log($"Consumed {p_shader.name}");
-				p_data.Clear();
+				//Debug.Log($"Consumed {shader.name}");
+				data.Clear();
 		}
 	}
 }
+
 #endif
