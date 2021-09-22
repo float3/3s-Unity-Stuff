@@ -24,7 +24,6 @@ namespace _3.Editor
 		public bool OnPreprocessAvatar(GameObject avatarGameObject)
 		{
 			avatarcallback = true;
-			Debug.Log("OnProcessAvatar");
 			return true;
 		}
 	}
@@ -36,18 +35,14 @@ namespace _3.Editor
 
 		public bool OnBuildRequested(VRCSDKRequestedBuildType requestedBuildType)
 		{
-			Debug.Log("OnBuildRequested" + requestedBuildType);
-
 			if (requestedBuildType == VRCSDKRequestedBuildType.Avatar)
 			{
 				requestedBuildTypeCallback = requestedBuildType;
-				Debug.Log("VRCSDKRequestedBuildtype Avatar");
 			}
 
 			else if (requestedBuildType == VRCSDKRequestedBuildType.Scene)
 			{
 				requestedBuildTypeCallback = requestedBuildType;
-				Debug.Log("VRCSDKRequestedBuildtype Scene");
 			}
 
 			return true;
