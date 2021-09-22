@@ -1,18 +1,11 @@
 ﻿#if UNITY_EDITOR
 
-using System;
-using System.IO;
-using System.Security.Cryptography;
-using System.Text;
-using UnityEditor;
-using UnityEngine;
-using VRC.Core;
-
 namespace _3.Editor
 {
 	public class AssetBundleCacher
 	{
-#region
+		#region
+
 		/*
 		public static AssetBundleCacher Instance;
 
@@ -101,9 +94,8 @@ namespace _3.Editor
 
 			return Path.Combine(cachePath, idHash, versionLocation);
 		*/
-#endregion
 
+		#endregion
 	}
-}
 }
 #endif
