@@ -1,70 +1,78 @@
-﻿#if UNITY_EDITOR
+﻿#if UNITY_EDITOR && (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3)
+
+#region
+
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using UnityEditor.Build;
 using UnityEditor.Rendering;
+using UnityEngine;
+using UnityEngine.Rendering;
+using VRC.SDKBase.Editor.BuildPipeline;
+
+#endregion
 
 // thank you Scruffy and z3y
 
 namespace _3.Editor
 {
-
-	public class OnAvatarBuild : IVRCSDKPreprocessAvatarCallback
+	public class OnBuildAvatar : IVRCSDKPreprocessAvatarCallback
 	{
+		public static bool avatarcallback;
 		public int callbackOrder => 3;
 
-		public bool OnPreprocessAvatars(Gameobject avatarGameobject)
+		public bool OnPreprocessAvatar(GameObject avatarGameObject)
 		{
-			Debug.Log("OnPreProcessAvatars" + avatarGameobject);
+			avatarcallback = true;
+			Debug.Log("OnProcessAvatar");
 			return true;
 		}
 	}
 
-	public class OnSceneBuild : IVRCSDKBuildRequestedCallback
+	public class OnBuildRequest : IVRCSDKBuildRequestedCallback
 	{
+		public static VRCSDKRequestedBuildType requestedBuildTypeCallback;
 		public int callbackOrder => 6;
 
 		public bool OnBuildRequested(VRCSDKRequestedBuildType requestedBuildType)
 		{
-			Debug.Log("OnBuildRequested" + requestedBuildType)
+			Debug.Log("OnBuildRequested" + requestedBuildType);
+
 			if (requestedBuildType == VRCSDKRequestedBuildType.Avatar)
 			{
-#define AVATAR
-				return true;
+				requestedBuildTypeCallback = requestedBuildType;
+				Debug.Log("VRCSDKRequestedBuildtype Avatar");
 			}
-			else
+
+			else if (requestedBuildType == VRCSDKRequestedBuildType.Scene)
 			{
-#undef AVATAR
-				return true;
+				requestedBuildTypeCallback = requestedBuildType;
+				Debug.Log("VRCSDKRequestedBuildtype Scene");
 			}
+
+			return true;
 		}
 	}
 
-
-
 	public class PreprocessShaders : IPreprocessShaders
 	{
-
-		public PassType[] pts = {PassType.Deferred, PassType.LightPrePassBase, PassType.LightPrePassFinal, PassType.VertexLM, PassType.MotionVectors, PassType.ScriptableRenderPipeline, PassType.ScriptableRenderPipelineDefaultUnlit};
+		private readonly PassType[] pts =
+		{
+			PassType.Deferred, PassType.LightPrePassBase, PassType.LightPrePassFinal, PassType.VertexLM,
+			PassType.MotionVectors, PassType.ScriptableRenderPipeline, PassType.ScriptableRenderPipelineDefaultUnlit
+		};
 
 		public int callbackOrder => 9;
 
 		public void OnProcessShader(Shader shader, ShaderSnippetData snippet, IList<ShaderCompilerData> data)
 		{
-			Debug.Log("OnProcessShader")
-#if AVATAR
-		Debug.Log("AVATAR");
-		public PassType[] ptsfinal = {pts + PassType.Normal};
-#else
-		Debug.Log("ELSE");
-		public PassType[] ptsfinal = pts;
-#endif
-#undef AVATAR
+			if (OnBuildAvatar.avatarcallback &&
+			    OnBuildRequest.requestedBuildTypeCallback == VRCSDKRequestedBuildType.Avatar)
+				if (snippet.passType == PassType.Meta)
+					data.Clear();
 
-			if (ptsfinal.Contains(snippet.passType) )
+			if (pts.Contains(snippet.passType))
 			{
-				//Debug.Log($"Consumed {shader.name} = {snippet.passType} = {snippet.passName}");
 				data.Clear();
 				return;
 			}
@@ -72,13 +80,8 @@ namespace _3.Editor
 			string shaderName = shader.name;
 			shaderName = string.IsNullOrEmpty(shaderName) ? "Empty" : shaderName;
 			if (shaderName.Contains("Hidden/PostProcessing"))
-			{
-				//Debug.Log($"Consumed {shader.name}");
 				data.Clear();
-			}
 		}
-
 	}
 }
-
 #endif
