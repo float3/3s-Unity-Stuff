@@ -1,4 +1,4 @@
-﻿//#if UNITY_EDITOR
+﻿#if UNITY_EDITOR
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -81,4 +81,4 @@ namespace _3.Editor
 	}
 }
 
-//#endif
+#endif
