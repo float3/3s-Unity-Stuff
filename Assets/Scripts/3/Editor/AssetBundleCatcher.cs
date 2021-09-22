@@ -1,4 +1,6 @@
-﻿using System;
+﻿#if UNITY_EDITOR
+
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
@@ -10,6 +12,8 @@ namespace _3.Editor
 {
 	public class AssetBundleCacher
 	{
+#region
+		/*
 		public static AssetBundleCacher Instance;
 
 		static AssetBundleCacher()
@@ -88,7 +92,6 @@ namespace _3.Editor
 			return cachePath;
 		}
 
-
 		public string GetVRChatCacheFullLocation(string id, int version)
 		{
 			var cachePath = GetVRChatCacheLocation();
@@ -97,6 +100,10 @@ namespace _3.Editor
 
 
 			return Path.Combine(cachePath, idHash, versionLocation);
-		}
+		*/
+#endregion
+
 	}
 }
+}
+#endif

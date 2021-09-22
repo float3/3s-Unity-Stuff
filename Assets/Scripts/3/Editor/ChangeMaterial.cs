@@ -6,7 +6,7 @@ using UnityEngine;
 
 namespace _3.Editor
 {
-	public sealed class MaterialMigrator : EditorWindow
+	public class MaterialMigrator : EditorWindow
 	{
 		private Material selectedMaterial;
 		private SerializedObject serializedObject;
@@ -71,9 +71,9 @@ namespace _3.Editor
 
 		private static void MigrateMultiple(Shader p_shader)
 		{
-			foreach (var obj in Selection.objects)
+			foreach (Object obj in Selection.objects)
 			{
-				var mat = obj as Material;
+				Material mat = obj as Material;
 				if (mat != null)
 					MigrateMaterial(mat, p_shader);
 				//Debug.Log("debug");
@@ -82,7 +82,7 @@ namespace _3.Editor
 
 		private static void MigrateMaterial(Material p_material, Shader p_shader)
 		{
-			var storedQueue = p_material.renderQueue;
+			int storedQueue = p_material.renderQueue;
 			p_material.shader = p_shader;
 			p_material.renderQueue = storedQueue;
 		}
