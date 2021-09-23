@@ -61,12 +61,7 @@ namespace _3.Editor
 
 		public void OnProcessShader(Shader shader, ShaderSnippetData snippet, IList<ShaderCompilerData> data)
 		{
-			if (OnBuildAvatar.avatarcallback &&
-			    OnBuildRequest.requestedBuildTypeCallback == VRCSDKRequestedBuildType.Avatar)
-				if (snippet.passType == PassType.Meta)
-					data.Clear();
-
-			if (pts.Contains(snippet.passType))
+			if (pts.Contains(snippet.passType) || (OnBuildAvatar.avatarcallback && OnBuildRequest.requestedBuildTypeCallback == VRCSDKRequestedBuildType.Avatar && snippet.passType == PassType.Meta))
 			{
 				data.Clear();
 				return;
@@ -75,7 +70,9 @@ namespace _3.Editor
 			string shaderName = shader.name;
 			shaderName = string.IsNullOrEmpty(shaderName) ? "Empty" : shaderName;
 			if (shaderName.Contains("Hidden/PostProcessing"))
+			{
 				data.Clear();
+			}
 		}
 	}
 }
