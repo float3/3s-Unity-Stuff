@@ -4,6 +4,7 @@
 
 using System.Collections.Generic;
 using System.Linq;
+using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Rendering;
 using UnityEngine;
@@ -16,18 +17,6 @@ using VRC.SDKBase.Editor.BuildPipeline;
 
 namespace _3.Editor
 {
-	public class OnBuildAvatar : IVRCSDKPreprocessAvatarCallback
-	{
-		public static bool avatarcallback;
-		public int callbackOrder => 3;
-
-		public bool OnPreprocessAvatar(GameObject avatarGameObject)
-		{
-			avatarcallback = true;
-			return true;
-		}
-	}
-
 	public class OnBuildRequest : IVRCSDKBuildRequestedCallback
 	{
 		public static VRCSDKRequestedBuildType requestedBuildTypeCallback;
@@ -61,7 +50,7 @@ namespace _3.Editor
 
 		public void OnProcessShader(Shader shader, ShaderSnippetData snippet, IList<ShaderCompilerData> data)
 		{
-			if (pts.Contains(snippet.passType) || (OnBuildAvatar.avatarcallback && OnBuildRequest.requestedBuildTypeCallback == VRCSDKRequestedBuildType.Avatar && snippet.passType == PassType.Meta))
+			if (pts.Contains(snippet.passType) || (OnBuildRequest.requestedBuildTypeCallback == VRCSDKRequestedBuildType.Scene && !Lightmapping.realtimeGI && snippet.passType == PassType.Meta) || (OnBuildRequest.requestedBuildTypeCallback == VRCSDKRequestedBuildType.Avatar && snippet.passType == PassType.Meta))
 			{
 				data.Clear();
 				return;
