@@ -1,3 +1,8 @@
+// Code by _3, Razgriz
+// based on
+// https://forum.unity.com/threads/beyond-wrinkle-maps-to-realtime-tension-maps-current-state-of-the-unity-possibilities.509473/#post-5202389
+// https://github.com/ted10401/GeometryShaderCookbook
+// https://github.com/Xiexe/Unity-Lit-Shader-Templates/tree/refactor
 // Reads triangle perimeters of a skinned mesh and encodes to a png texture.
 // Triangles are read in order of their primitive IDs.
 //
