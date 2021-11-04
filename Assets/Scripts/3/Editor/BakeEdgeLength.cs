@@ -1,9 +1,3 @@
-// Code by _3, Razgriz
-// based on
-// https://forum.unity.com/threads/beyond-wrinkle-maps-to-realtime-tension-maps-current-state-of-the-unity-possibilities.509473/#post-5202389
-// https://github.com/ted10401/GeometryShaderCookbook
-// https://github.com/Xiexe/Unity-Lit-Shader-Templates/tree/refactor
-
 // Reads triangle perimeters of a skinned mesh and encodes to a png texture.
 // Triangles are read in order of their primitive IDs.
 //
@@ -31,33 +25,39 @@ void geom(... uint fragID : SV_PrimitiveID)
 */
 
 #if UNITY_EDITOR
+
+#region
+
 using System.IO;
 using UnityEditor;
 using UnityEngine;
 
-namespace _3.Editor
+#endregion
+
+// ReSharper disable once CheckNamespace
+namespace _3.BakeEdgeLength
 {
 	public class WriteEdgeLengthTexture : EditorWindow
 	{
 		private static readonly float lengthResolution = 0.000001f; // Needs to match shader declare
-		public static SkinnedMeshRenderer skinnedMeshRenderer;
-		public static string meshName;
+		public static SkinnedMeshRenderer SkinnedMeshRenderer;
+		public static string MeshName;
 		private static readonly int TriangleLengthBuffer = Shader.PropertyToID("_TriangleLengthBuffer");
-		private static readonly int POTTexSize = Shader.PropertyToID("_POTTexSize");
-		private static float l;
+		private static readonly int PotTexSize = Shader.PropertyToID("_POTTexSize");
+		private static float _l;
 
 		[MenuItem("CONTEXT/SkinnedMeshRenderer/Bake Edge Length")]
-		private static void Bake(MenuCommand p_command)
+		private static void Bake(MenuCommand pCommand)
 		{
-			skinnedMeshRenderer = (SkinnedMeshRenderer)p_command.context;
-			Mesh mesh = skinnedMeshRenderer.sharedMesh;
-			meshName = mesh.name;
+			SkinnedMeshRenderer = (SkinnedMeshRenderer)pCommand.context;
+			Mesh mesh = SkinnedMeshRenderer.sharedMesh;
+			MeshName = mesh.name;
 
 			Vector3[] verts = mesh.vertices;
 			int[] triangles = mesh.GetTriangles(0);
 			int triCount = triangles.Length / 3;
 
-			int texSize = Mathf.NextPowerOfTwo((int) Mathf.Sqrt(triCount));
+			int texSize = Mathf.NextPowerOfTwo((int)Mathf.Sqrt(triCount));
 
 			Texture2D triangleLengthTexture = new Texture2D(texSize, texSize, TextureFormat.ARGB32, true)
 			{
@@ -76,32 +76,32 @@ namespace _3.Editor
 				}
 				else
 				{
-					l = (verts[triangles[t * 3]] - verts[triangles[t * 3 + 1]]).magnitude +
+					_l = (verts[triangles[t * 3]] - verts[triangles[t * 3 + 1]]).magnitude +
 					    (verts[triangles[t * 3 + 1]] - verts[triangles[t * 3 + 2]]).magnitude +
 					    (verts[triangles[t * 3 + 2]] - verts[triangles[t * 3]]).magnitude;
 
-					triangleLengthTexture.SetPixel(x, y, EncodeDistanceToColor(l, lengthResolution));
+					triangleLengthTexture.SetPixel(x, y, EncodeDistanceToColor(_l, lengthResolution));
 				}
 			}
 
 			//triangleLengthTexture.SetPixel(texSize, texSize, EncodeDistanceToColor((float)(texSize), 1)); // Optional - write texture size to top right pixel
 
 			triangleLengthTexture.Apply();
-			skinnedMeshRenderer.sharedMaterial.SetTexture(TriangleLengthBuffer, triangleLengthTexture);
-			skinnedMeshRenderer.sharedMaterial.SetFloat(POTTexSize, texSize);
+			SkinnedMeshRenderer.sharedMaterial.SetTexture(TriangleLengthBuffer, triangleLengthTexture);
+			SkinnedMeshRenderer.sharedMaterial.SetFloat(PotTexSize, texSize);
 
-			string path = $"Assets/Scripts/3/Editor/GeneratedAssets/t_{meshName}_edgeLengths.png";
+			string path = $"Assets/Scripts/3/Editor/GeneratedAssets/t_{MeshName}_edgeLengths.png";
 
 			SaveTextureToFile(triangleLengthTexture, path, texSize);
 		}
 
-		private static Color32 EncodeDistanceToColor(float p_distance, float p_resolution)
+		private static Color32 EncodeDistanceToColor(float pDistance, float pResolution)
 		{
-			int aCol = (int) (p_distance / p_resolution);
-			byte r = (byte) (aCol & 0xFF);
-			byte g = (byte) ((aCol >> 8) & 0xFF);
-			byte b = (byte) ((aCol >> 16) & 0xFF);
-			byte a = (byte) ((aCol >> 24) & 0xFF);
+			int aCol = (int)(pDistance / pResolution);
+			byte r = (byte)(aCol & 0xFF);
+			byte g = (byte)((aCol >> 8) & 0xFF);
+			byte b = (byte)((aCol >> 16) & 0xFF);
+			byte a = (byte)((aCol >> 24) & 0xFF);
 
 			Color32 outColor = new Color32(r, g, b, a);
 
@@ -110,19 +110,19 @@ namespace _3.Editor
 			return outColor;
 		}
 
-		private static void SaveTextureToFile(Texture2D p_texture, string p_filename, int p_size)
+		private static void SaveTextureToFile(Texture2D pTexture, string pFilename, int pSize)
 		{
-			File.WriteAllBytes(p_filename, p_texture.EncodeToPNG());
+			File.WriteAllBytes(pFilename, pTexture.EncodeToPNG());
 			AssetDatabase.Refresh();
-			TextureImporter source = (TextureImporter) AssetImporter.GetAtPath(p_filename);
-			source.maxTextureSize = p_size;
+			TextureImporter source = (TextureImporter)AssetImporter.GetAtPath(pFilename);
+			source.maxTextureSize = pSize;
 			source.filterMode = FilterMode.Point;
 			source.textureCompression = TextureImporterCompression.Uncompressed;
 			source.sRGBTexture = false;
 			source.mipmapEnabled = false;
 			AssetDatabase.Refresh();
-			Texture2D texture2D = (Texture2D) AssetDatabase.LoadAssetAtPath(p_filename, typeof(Texture2D));
-			skinnedMeshRenderer.sharedMaterial.SetTexture(TriangleLengthBuffer, texture2D);
+			Texture2D texture2D = (Texture2D)AssetDatabase.LoadAssetAtPath(pFilename, typeof(Texture2D));
+			SkinnedMeshRenderer.sharedMaterial.SetTexture(TriangleLengthBuffer, texture2D);
 			AssetDatabase.Refresh();
 		}
 	}

@@ -15,23 +15,24 @@ using VRC.SDKBase.Editor.BuildPipeline;
 
 // thank you Scruffy and z3y
 
-namespace _3.Editor
+// ReSharper disable once CheckNamespace
+namespace _3.ShaderPreProcessor
 {
 	public class OnBuildRequest : IVRCSDKBuildRequestedCallback
 	{
-		public static VRCSDKRequestedBuildType requestedBuildTypeCallback;
+		public static VRCSDKRequestedBuildType RequestedBuildTypeCallback;
 		public int callbackOrder => 6;
 
 		public bool OnBuildRequested(VRCSDKRequestedBuildType requestedBuildType)
 		{
 			if (requestedBuildType == VRCSDKRequestedBuildType.Avatar)
 			{
-				requestedBuildTypeCallback = requestedBuildType;
+				RequestedBuildTypeCallback = requestedBuildType;
 			}
 
 			else if (requestedBuildType == VRCSDKRequestedBuildType.Scene)
 			{
-				requestedBuildTypeCallback = requestedBuildType;
+				RequestedBuildTypeCallback = requestedBuildType;
 			}
 
 			return true;
@@ -40,7 +41,7 @@ namespace _3.Editor
 
 	public class PreprocessShaders : IPreprocessShaders
 	{
-		private readonly PassType[] pts =
+		private readonly PassType[] _pts =
 		{
 			PassType.Deferred, PassType.LightPrePassBase, PassType.LightPrePassFinal, PassType.VertexLM,
 			PassType.MotionVectors, PassType.ScriptableRenderPipeline, PassType.ScriptableRenderPipelineDefaultUnlit
@@ -50,7 +51,11 @@ namespace _3.Editor
 
 		public void OnProcessShader(Shader shader, ShaderSnippetData snippet, IList<ShaderCompilerData> data)
 		{
-			if (pts.Contains(snippet.passType) || (OnBuildRequest.requestedBuildTypeCallback == VRCSDKRequestedBuildType.Scene && !Lightmapping.realtimeGI && snippet.passType == PassType.Meta) || (OnBuildRequest.requestedBuildTypeCallback == VRCSDKRequestedBuildType.Avatar && snippet.passType == PassType.Meta))
+			if (_pts.Contains(snippet.passType) ||
+			    OnBuildRequest.RequestedBuildTypeCallback == VRCSDKRequestedBuildType.Scene &&
+			    !Lightmapping.realtimeGI && snippet.passType == PassType.Meta ||
+			    OnBuildRequest.RequestedBuildTypeCallback == VRCSDKRequestedBuildType.Avatar &&
+			    snippet.passType == PassType.Meta)
 			{
 				data.Clear();
 				return;

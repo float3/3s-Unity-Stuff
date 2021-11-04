@@ -1,16 +1,21 @@
 //referenced from https://github.com/lukis101/VRCUnityStuffs/blob/master/Scripts/Editor/MaterialCleaner.cs
-
 #if UNITY_EDITOR
+
+#region
+
 using UnityEditor;
 using UnityEngine;
 
-namespace _3.Editor
+#endregion
+
+// ReSharper disable once CheckNamespace
+namespace _3.MaterialMigrator
 {
 	public class MaterialMigrator : EditorWindow
 	{
-		private Material selectedMaterial;
-		private SerializedObject serializedObject;
-		private Shader yourShader;
+		private Material _selectedMaterial;
+		private SerializedObject _serializedObject;
+		private Shader _yourShader;
 
 		private void OnEnable()
 		{
@@ -21,22 +26,22 @@ namespace _3.Editor
 		{
 			EditorGUIUtility.labelWidth = 200f;
 
-			yourShader = (Shader) EditorGUILayout.ObjectField("Shader", yourShader, typeof(Shader), false);
+			_yourShader = (Shader)EditorGUILayout.ObjectField("Shader", _yourShader, typeof(Shader), false);
 
 
-			if (selectedMaterial == null)
+			if (_selectedMaterial == null)
 			{
 				EditorGUILayout.LabelField("No material selected");
 			}
 			else
 			{
-				serializedObject.Update();
+				_serializedObject.Update();
 
 
 				EditorGUILayout.Space();
-				EditorGUILayout.LabelField("Selected material:", selectedMaterial.name);
+				EditorGUILayout.LabelField("Selected material:", _selectedMaterial.name);
 				if (GUILayout.Button("Migrate mats"))
-					MigrateMultiple(yourShader);
+					MigrateMultiple(_yourShader);
 			}
 
 
@@ -60,31 +65,30 @@ namespace _3.Editor
 			GetWindow<MaterialMigrator>("Mat. Migrator");
 		}
 
-		[MenuItem("Tools/3/Migrate Materials to lit")]
-		private void GetSelectedMaterial()
+		private  void GetSelectedMaterial()
 		{
-			selectedMaterial = Selection.activeObject as Material;
-			if (selectedMaterial != null) serializedObject = new SerializedObject(selectedMaterial);
+			_selectedMaterial = Selection.activeObject as Material;
+			if (_selectedMaterial != null) _serializedObject = new SerializedObject(_selectedMaterial);
 
 			Repaint();
 		}
 
-		private static void MigrateMultiple(Shader p_shader)
+		private static void MigrateMultiple(Shader pShader)
 		{
 			foreach (Object obj in Selection.objects)
 			{
 				Material mat = obj as Material;
 				if (mat != null)
-					MigrateMaterial(mat, p_shader);
+					MigrateMaterial(mat, pShader);
 				//Debug.Log("debug");
 			}
 		}
 
-		private static void MigrateMaterial(Material p_material, Shader p_shader)
+		private static void MigrateMaterial(Material pMaterial, Shader pShader)
 		{
-			int storedQueue = p_material.renderQueue;
-			p_material.shader = p_shader;
-			p_material.renderQueue = storedQueue;
+			int storedQueue = pMaterial.renderQueue;
+			pMaterial.shader = pShader;
+			pMaterial.renderQueue = storedQueue;
 		}
 	}
 }

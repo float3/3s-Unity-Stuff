@@ -2,17 +2,18 @@
 using UdonSharp;
 using UnityEngine;
 
-namespace _3.UdonSharp
+// ReSharper disable once CheckNamespace
+namespace _3.StealLightMap
 {
 	[ExecuteInEditMode]
 	public class StealLightmap : UdonSharpBehaviour
 	{
 		public MeshRenderer lightmappedObject;
-		private MeshRenderer currentRenderer;
+		private MeshRenderer _currentRenderer;
 
 		private void Start()
 		{
-			currentRenderer = gameObject.GetComponent<MeshRenderer>();
+			_currentRenderer = gameObject.GetComponent<MeshRenderer>();
 			RendererInfoTransfer();
 		}
 
@@ -30,32 +31,33 @@ namespace _3.UdonSharp
 
 		private void RendererInfoTransfer()
 		{
-			if (lightmappedObject == null || currentRenderer == null)
+			if (lightmappedObject == null || _currentRenderer == null)
 				return;
 
-			currentRenderer.lightmapIndex = lightmappedObject.lightmapIndex;
-			currentRenderer.lightmapScaleOffset = lightmappedObject.lightmapScaleOffset;
-			currentRenderer.realtimeLightmapIndex = lightmappedObject.realtimeLightmapIndex;
-			currentRenderer.realtimeLightmapScaleOffset = lightmappedObject.realtimeLightmapScaleOffset;
-			currentRenderer.lightProbeUsage = lightmappedObject.lightProbeUsage;
+			_currentRenderer.lightmapIndex = lightmappedObject.lightmapIndex;
+			_currentRenderer.lightmapScaleOffset = lightmappedObject.lightmapScaleOffset;
+			_currentRenderer.realtimeLightmapIndex = lightmappedObject.realtimeLightmapIndex;
+			_currentRenderer.realtimeLightmapScaleOffset = lightmappedObject.realtimeLightmapScaleOffset;
+			_currentRenderer.lightProbeUsage = lightmappedObject.lightProbeUsage;
 		}
 	}
 }
 #else
 using UnityEngine;
 
-namespace _3.Mono
+// ReSharper disable once CheckNamespace
+namespace _3.StealLightMap
 {
     [ExecuteInEditMode]
     public class StealLightmap : MonoBehaviour
     {
         public MeshRenderer lightmappedObject;
 
-        private MeshRenderer currentRenderer;
+        private MeshRenderer _currentRenderer;
 
         private void Awake()
         {
-            currentRenderer = gameObject.GetComponent<MeshRenderer>();
+            _currentRenderer = gameObject.GetComponent<MeshRenderer>();
             RendererInfoTransfer();
         }
 
@@ -73,14 +75,14 @@ namespace _3.Mono
 
         private void RendererInfoTransfer()
         {
-            if (lightmappedObject == null || currentRenderer == null)
+            if (lightmappedObject == null || _currentRenderer == null)
                 return;
 
-            currentRenderer.lightmapIndex = lightmappedObject.lightmapIndex;
-            currentRenderer.lightmapScaleOffset = lightmappedObject.lightmapScaleOffset;
-            currentRenderer.realtimeLightmapIndex = lightmappedObject.realtimeLightmapIndex;
-            currentRenderer.realtimeLightmapScaleOffset = lightmappedObject.realtimeLightmapScaleOffset;
-            currentRenderer.lightProbeUsage = lightmappedObject.lightProbeUsage;
+            _currentRenderer.lightmapIndex = lightmappedObject.lightmapIndex;
+            _currentRenderer.lightmapScaleOffset = lightmappedObject.lightmapScaleOffset;
+            _currentRenderer.realtimeLightmapIndex = lightmappedObject.realtimeLightmapIndex;
+            _currentRenderer.realtimeLightmapScaleOffset = lightmappedObject.realtimeLightmapScaleOffset;
+            _currentRenderer.lightProbeUsage = lightmappedObject.lightProbeUsage;
         }
     }
 }
