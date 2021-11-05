@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR && (VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3)
+﻿#if UNITY_EDITOR
 
 #region
 
@@ -23,6 +23,7 @@ using VRC.SDKBase.Editor.BuildPipeline;
 // ReSharper disable once CheckNamespace
 namespace _3.ShaderPreProcessor
 {
+	#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 	public class OnBuildRequest : IVRCSDKBuildRequestedCallback
 	{
 		public static VRCSDKRequestedBuildType RequestedBuildTypeCallback;
@@ -113,20 +114,78 @@ namespace _3.ShaderPreProcessor
 		}
 	}
 
+	#else
+	class OnBuild : IPreprocessBuildWithReport
+	{
+
+		public int callbackOrder => 3;
+		public void OnPreprocessBuild(BuildReport report)
+		{
+			Scene scene = SceneManager.GetActiveScene();
+
+			string[] shaderpaths = AssetDatabase.GetDependencies(scene.path).Where(x => x.EndsWith(".shader"))
+				.ToArray();
+
+			PreprocessShaders.ExcludedShaders.Clear();
+
+			foreach (string shaderpath in shaderpaths)
+			{
+				string[] shader = File.ReadAllLines(shaderpath);
+
+				foreach (string line in new CommentFreeIterator(shader))
+				{
+					if (line.Contains("UsePass"))
+					{
+						string shadernameRegex = "(?<=\\\")(.*)(?=\\/)";
+						string passnameRegex = "(?<=\\/)(.*?)(?=\")";
+
+						string[] excludedShaderPass = new string[3];
+
+						excludedShaderPass[0] = Regex.Match(line, shadernameRegex).Value;
+						excludedShaderPass[1] = Regex.Match(line, passnameRegex).Value;
+						excludedShaderPass[2] = AssetDatabase.LoadAssetAtPath<Shader>(shaderpath).name;
+
+						PreprocessShaders.ExcludedShaders.Add(excludedShaderPass);
+					}
+				}
+			}
+		}
+	}
+
+	#endif
+
 	public class PreprocessShaders : IPreprocessShaders
 	{
 		public static List<string[]> ExcludedShaders = new List<string[]>();
 
-		private readonly PassType[] _pts =
-		{
-			PassType.Deferred, PassType.LightPrePassBase, PassType.LightPrePassFinal, PassType.VertexLM,
-			PassType.MotionVectors, PassType.ScriptableRenderPipeline, PassType.ScriptableRenderPipelineDefaultUnlit
-		};
+		private readonly List<PassType> _passesToStrip = new List<PassType>();
 
 		public int callbackOrder => 9;
 
+
 		public void OnProcessShader(Shader shader, ShaderSnippetData snippet, IList<ShaderCompilerData> data)
 		{
+			#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
+
+			_passesToStrip.Add(PassType.Deferred);
+			_passesToStrip.Add(PassType.LightPrePassBase);
+			_passesToStrip.Add(PassType.LightPrePassFinal);
+			_passesToStrip.Add(PassType.ScriptableRenderPipeline);
+			_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
+			_passesToStrip.Add(PassType.MotionVectors);
+
+
+			_passesToStrip.Add(PassType.Meta);
+			if (OnBuildRequest.RequestedBuildTypeCallback == VRCSDKRequestedBuildType.Scene)
+			{
+				if (Lightmapping.realtimeGI)
+				{
+					_passesToStrip.Remove(PassType.Meta);
+				}
+
+				_passesToStrip.Remove(PassType.MotionVectors);
+			}
+
 			string shaderName = shader.name;
 			shaderName = string.IsNullOrEmpty(shaderName) ? "Empty" : shaderName;
 			if (shaderName.Contains("Hidden/PostProcessing"))
@@ -134,6 +193,67 @@ namespace _3.ShaderPreProcessor
 				data.Clear();
 				return;
 			}
+
+			//not sure how Vertex and VertexLM work so they are unhandled
+			//from my understanding they can be used even if the RenderingPath is not Vertex
+			#else
+			BuildTargetGroup buildTargetGroup =
+				BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
+
+
+			TierSettings tierSettings = EditorGraphicsSettings.GetTierSettings(buildTargetGroup, GraphicsTier.Tier3);
+
+			RenderingPath renderingPath = tierSettings.renderingPath;
+
+			if (renderingPath == RenderingPath.Forward)
+			{
+				_passesToStrip.Add(PassType.Deferred);
+				
+				_passesToStrip.Add(PassType.LightPrePassFinal);
+				_passesToStrip.Add(PassType.LightPrePassBase);
+			}
+			else if (renderingPath == RenderingPath.DeferredLighting)
+			{
+				_passesToStrip.Add(PassType.Deferred);
+				
+				_passesToStrip.Add(PassType.ForwardBase);
+				_passesToStrip.Add(PassType.ForwardAdd);
+			}
+			else if (renderingPath == RenderingPath.DeferredShading)
+			{
+				_passesToStrip.Add(PassType.LightPrePassFinal);
+				_passesToStrip.Add(PassType.LightPrePassBase);
+				
+				_passesToStrip.Add(PassType.ForwardBase);
+				_passesToStrip.Add(PassType.ForwardAdd);
+			}
+
+			if (GraphicsSettings.renderPipelineAsset != null)
+			{
+				string renderPipelineName = GraphicsSettings.renderPipelineAsset.ToString();
+				if (renderPipelineName.Contains("Custom"))
+				{
+					//
+				}
+				else if (string.IsNullOrEmpty(renderPipelineName) || renderPipelineName.Contains("HDRenderPipeline") || renderPipelineName.Contains("LightWeight") || renderPipelineName.Contains("Universal"))
+				{
+					_passesToStrip.Add(PassType.ScriptableRenderPipeline);
+					_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
+				}
+			}
+			else
+			{
+				_passesToStrip.Add(PassType.ScriptableRenderPipeline);
+				_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
+			}
+			
+			if (!Lightmapping.realtimeGI)
+			{  
+				_passesToStrip.Add(PassType.Meta);
+			}
+
+			#endif
+
 
 			foreach (string[] excludedShader in ExcludedShaders)
 			{
@@ -145,11 +265,7 @@ namespace _3.ShaderPreProcessor
 				}
 			}
 
-			if (_pts.Contains(snippet.passType) ||
-			    OnBuildRequest.RequestedBuildTypeCallback == VRCSDKRequestedBuildType.Scene &&
-			    !Lightmapping.realtimeGI && snippet.passType == PassType.Meta ||
-			    OnBuildRequest.RequestedBuildTypeCallback == VRCSDKRequestedBuildType.Avatar &&
-			    snippet.passType == PassType.Meta)
+			if (_passesToStrip.Contains(snippet.passType))
 			{
 				data.Clear();
 			}

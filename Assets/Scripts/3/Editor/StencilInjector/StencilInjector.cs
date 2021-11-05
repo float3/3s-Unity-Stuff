@@ -129,10 +129,10 @@ namespace _3.StencilInjector
 				                       "        [IntRange] _Stencil (\"Reference Value\", Range(0, 255)) = 0\n" +
 				                       "        [IntRange] _StencilWriteMask (\"ReadMask\", Range(0, 255)) = 255\n" +
 				                       "        [IntRange] _StencilReadMask (\"WriteMask\", Range(0, 255)) = 255\n" +
-				                       "        [WideEnum(UnityEngine.Rendering.CompareFunction)] _StencilComp (\"Compare Function\", Int) = 8\n" +
-				                       "        [WideEnum(UnityEngine.Rendering.StencilOp)] _StencilPass (\"Pass Op\", Int) = 0\n" +
-				                       "        [WideEnum(UnityEngine.Rendering.StencilOp)] _StencilFail (\"Fail Op\", Int) = 0\n" +
-				                       "        [WideEnum(UnityEngine.Rendering.StencilOp)] _StencilZFail (\"ZFail Op\", Int) = 0\n";
+				                       "        [Enum(UnityEngine.Rendering.CompareFunction)] _StencilComp (\"Compare Function\", Int) = 8\n" +
+				                       "        [Enum(UnityEngine.Rendering.StencilOp)] _StencilPass (\"Pass Op\", Int) = 0\n" +
+				                       "        [Enum(UnityEngine.Rendering.StencilOp)] _StencilFail (\"Fail Op\", Int) = 0\n" +
+				                       "        [Enum(UnityEngine.Rendering.StencilOp)] _StencilZFail (\"ZFail Op\", Int) = 0\n";
 				epLine = epLine.Substring(0, ss.BeginPropertiesSkip) + propertiesAdd +
 				         epLine.Substring(ss.BeginPropertiesSkip);
 				ss.ShaderData[ss.BeginPropertiesLineNum] = epLine;
