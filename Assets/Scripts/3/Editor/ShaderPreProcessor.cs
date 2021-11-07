@@ -18,7 +18,7 @@ using VRC.SDKBase.Editor.BuildPipeline;
 
 #endregion
 
-// thank you Scruffy and z3y
+// thank you Scruffy, z3y and TCL
 
 // ReSharper disable once CheckNamespace
 namespace _3.ShaderPreProcessor
@@ -167,25 +167,23 @@ namespace _3.ShaderPreProcessor
 		{
 			#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 
+			//VRC is BIRP, Forward shading so strip all deferred and SRP passes
+			//NOTE: I guess you can use deferred with a Camera set to deferred
 			_passesToStrip.Add(PassType.Deferred);
 			_passesToStrip.Add(PassType.LightPrePassBase);
 			_passesToStrip.Add(PassType.LightPrePassFinal);
 			_passesToStrip.Add(PassType.ScriptableRenderPipeline);
 			_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
-			_passesToStrip.Add(PassType.MotionVectors);
 
-
-			_passesToStrip.Add(PassType.Meta);
-			if (OnBuildRequest.RequestedBuildTypeCallback == VRCSDKRequestedBuildType.Scene)
+			//META Pass is only used in Editor, for lightmapping, and for realtimeGI from my understanding so strip if it's a Scene with rtGI enabled 
+			if (OnBuildRequest.RequestedBuildTypeCallback == VRCSDKRequestedBuildType.Avatar ||
+			    !Lightmapping.realtimeGI)
 			{
-				if (Lightmapping.realtimeGI)
-				{
-					_passesToStrip.Remove(PassType.Meta);
-				}
-
-				_passesToStrip.Remove(PassType.MotionVectors);
+				_passesToStrip.Add(PassType.Meta);
 			}
 
+
+			//Strip Post Processing
 			string shaderName = shader.name;
 			shaderName = string.IsNullOrEmpty(shaderName) ? "Empty" : shaderName;
 			if (shaderName.Contains("Hidden/PostProcessing"))
@@ -204,7 +202,8 @@ namespace _3.ShaderPreProcessor
 			TierSettings tierSettings = EditorGraphicsSettings.GetTierSettings(buildTargetGroup, GraphicsTier.Tier3);
 
 			RenderingPath renderingPath = tierSettings.renderingPath;
-
+			
+			//Strip passes incompatible with the current rendering path
 			if (renderingPath == RenderingPath.Forward)
 			{
 				_passesToStrip.Add(PassType.Deferred);
@@ -228,6 +227,7 @@ namespace _3.ShaderPreProcessor
 				_passesToStrip.Add(PassType.ForwardAdd);
 			}
 
+			//Strip passes incompatible with the current renderPipeLine
 			if (GraphicsSettings.renderPipelineAsset != null)
 			{
 				string renderPipelineName = GraphicsSettings.renderPipelineAsset.ToString();
@@ -247,6 +247,7 @@ namespace _3.ShaderPreProcessor
 				_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
 			}
 			
+			//Strip meta pass if rtGI isn't used
 			if (!Lightmapping.realtimeGI)
 			{  
 				_passesToStrip.Add(PassType.Meta);
@@ -254,7 +255,7 @@ namespace _3.ShaderPreProcessor
 
 			#endif
 
-
+			//If Unity does not find a matching Pass for the UsePass ShaderLab command, it shows the error material. https://docs.unity3d.com/Manual/SL-UsePass.html
 			foreach (string[] excludedShader in ExcludedShaders)
 			{
 				if (excludedShader[0] == shader.name && excludedShader[1] == snippet.passName)
