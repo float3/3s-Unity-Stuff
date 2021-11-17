@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 
 #region
 
@@ -15,10 +15,13 @@ using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using VRC.SDKBase.Editor.BuildPipeline;
+using Object = UnityEngine.Object;
 
 #endregion
 
 // thank you Scruffy, z3y and TCL
+// ah I'm not happy with this script it's gotten way to overengineered I think
+// Welp this should take care of most false positive strips hopefully
 
 // ReSharper disable once CheckNamespace
 namespace _3.ShaderPreProcessor
@@ -167,11 +170,61 @@ namespace _3.ShaderPreProcessor
 		{
 			#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 
-			//VRC is BIRP, Forward shading so strip all deferred and SRP passes
-			//NOTE: I guess you can use deferred with a Camera set to deferred
-			_passesToStrip.Add(PassType.Deferred);
-			_passesToStrip.Add(PassType.LightPrePassBase);
-			_passesToStrip.Add(PassType.LightPrePassFinal);
+			
+			
+			//Strip Post Processing
+			string shaderName = shader.name;
+			shaderName = string.IsNullOrEmpty(shaderName) ? "Empty" : shaderName;
+			if (shaderName.Contains("Hidden/PostProcessing"))
+			{
+				data.Clear();
+				return;
+			}
+
+			//this is a precaution since this audiolink shader might soon use a Vertex Pass
+			//so I want to make sure to never strip this shader
+			//but this shouldn't happen since the AudioLink camera should be then also be set to Vertex
+			if (shaderName.Contains("AudioLink/Internal/AudioTextureExport"))
+			{
+				return;
+			}
+			
+			
+			//VRC is BIRP, Forward shading so strip SRP passes
+			//Deferred is kept if the scene has any cameras using deferred rendering
+			Camera[] cameras = Object.FindObjectsOfType<Camera>();
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredLighting))
+			{
+				_passesToStrip.Add(PassType.LightPrePassBase);
+				_passesToStrip.Add(PassType.LightPrePassFinal);
+			}
+			else
+			{
+				_passesToStrip.Remove(PassType.LightPrePassBase);
+				_passesToStrip.Remove(PassType.LightPrePassFinal);
+			}
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredShading))
+			{
+				_passesToStrip.Add(PassType.Deferred);
+			}
+			else
+			{
+				_passesToStrip.Remove(PassType.Deferred);
+			}
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.VertexLit))
+			{
+				_passesToStrip.Add(PassType.Vertex);
+				_passesToStrip.Add(PassType.VertexLM);
+			}
+			else
+			{
+				_passesToStrip.Remove(PassType.Vertex);
+				_passesToStrip.Remove(PassType.VertexLM);
+			}
+
 			_passesToStrip.Add(PassType.ScriptableRenderPipeline);
 			_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
 
@@ -183,14 +236,7 @@ namespace _3.ShaderPreProcessor
 			}
 
 
-			//Strip Post Processing
-			string shaderName = shader.name;
-			shaderName = string.IsNullOrEmpty(shaderName) ? "Empty" : shaderName;
-			if (shaderName.Contains("Hidden/PostProcessing"))
-			{
-				data.Clear();
-				return;
-			}
+
 
 			//not sure how Vertex and VertexLM work so they are unhandled
 			//from my understanding they can be used even if the RenderingPath is not Vertex
@@ -252,6 +298,38 @@ namespace _3.ShaderPreProcessor
 			{  
 				_passesToStrip.Add(PassType.Meta);
 			}
+			
+			if(cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredLighting))
+            {
+	            _passesToStrip.Add(PassType.LightPrePassBase);
+	            _passesToStrip.Add(PassType.LightPrePassFinal);
+            }
+			else
+			{
+				_passesToStrip.Remove(PassType.LightPrePassBase);
+				_passesToStrip.Remove(PassType.LightPrePassFinal);
+			}
+            
+            if(cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredShading))
+            {
+	            _passesToStrip.Add(PassType.Deferred);
+            }
+            else
+            {
+	            _passesToStrip.Remove(PassType.Deferred);
+            }
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.VertexLit))
+			{
+				_passesToStrip.Add(PassType.Vertex);
+				_passesToStrip.Add(PassType.VertexLM);
+			}
+			else
+			{
+				_passesToStrip.Remove(PassType.Vertex);
+				_passesToStrip.Remove(PassType.VertexLM);
+			}
+
 
 			#endif
 
