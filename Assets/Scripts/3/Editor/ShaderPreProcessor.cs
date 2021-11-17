@@ -75,7 +75,7 @@ namespace _3.ShaderPreProcessor
 						if (line.Contains("UsePass"))
 						{
 							string shadernameRegex = "(?<=\\\")(.*)(?=\\/)";
-							string passnameRegex = "(?<=\\/)(.*?)(?=\")";
+							string passnameRegex = "(?<=\\/)([^\\/]*?)(?=\")";
 
 							string[] excludedShaderPass = new string[3];
 
@@ -128,7 +128,7 @@ namespace _3.ShaderPreProcessor
 						if (line.Contains("UsePass"))
 						{
 							string shadernameRegex = "(?<=\")(.*)(?=\\/)";
-							string passnameRegex = "(?<=\\/)(.*?)(?=\")";
+							string passnameRegex = "(?<=\\/)([^\\/]*?)(?=\")";
 
 							string[] excludedShaderPass = new string[3];
 
@@ -146,8 +146,7 @@ namespace _3.ShaderPreProcessor
 		}
 	}
 
-#else
-	
+	#else
 	class OnBuild : IPreprocessBuildWithReport
 	{
 		public int callbackOrder => 3;
@@ -184,7 +183,7 @@ namespace _3.ShaderPreProcessor
 					if (line.Contains("UsePass"))
 					{
 						string shadernameRegex = "(?<=\\\")(.*)(?=\\/)";
-						string passnameRegex = "(?<=\\/)(.*?)(?=\")";
+						string passnameRegex = "(?<=\\/)([^\\/]*?)(?=\")";
 
 						string[] excludedShaderPass = new string[3];
 
@@ -278,10 +277,8 @@ namespace _3.ShaderPreProcessor
 				_passesToStrip.Add(PassType.Meta);
 			}
 
-
-			//not sure how Vertex and VertexLM work so they are unhandled
-			//from my understanding they can be used even if the RenderingPath is not Vertex
 			#else
+			//from my understanding they can be used even if the RenderingPath is not Vertex
 			BuildTargetGroup buildTargetGroup =
 				BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
 
@@ -289,19 +286,19 @@ namespace _3.ShaderPreProcessor
 			TierSettings tierSettings = EditorGraphicsSettings.GetTierSettings(buildTargetGroup, GraphicsTier.Tier3);
 
 			RenderingPath renderingPath = tierSettings.renderingPath;
-			
+
 			//Strip passes incompatible with the current rendering path
 			if (renderingPath == RenderingPath.Forward)
 			{
 				_passesToStrip.Add(PassType.Deferred);
-				
+
 				_passesToStrip.Add(PassType.LightPrePassFinal);
 				_passesToStrip.Add(PassType.LightPrePassBase);
 			}
 			else if (renderingPath == RenderingPath.DeferredLighting)
 			{
 				_passesToStrip.Add(PassType.Deferred);
-				
+
 				_passesToStrip.Add(PassType.ForwardBase);
 				_passesToStrip.Add(PassType.ForwardAdd);
 			}
@@ -309,7 +306,7 @@ namespace _3.ShaderPreProcessor
 			{
 				_passesToStrip.Add(PassType.LightPrePassFinal);
 				_passesToStrip.Add(PassType.LightPrePassBase);
-				
+
 				_passesToStrip.Add(PassType.ForwardBase);
 				_passesToStrip.Add(PassType.ForwardAdd);
 			}
@@ -322,7 +319,8 @@ namespace _3.ShaderPreProcessor
 				{
 					//
 				}
-				else if (string.IsNullOrEmpty(renderPipelineName) || renderPipelineName.Contains("HDRenderPipeline") || renderPipelineName.Contains("LightWeight") || renderPipelineName.Contains("Universal"))
+				else if (string.IsNullOrEmpty(renderPipelineName) || renderPipelineName.Contains("HDRenderPipeline") ||
+				         renderPipelineName.Contains("LightWeight") || renderPipelineName.Contains("Universal"))
 				{
 					_passesToStrip.Add(PassType.ScriptableRenderPipeline);
 					_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
@@ -333,32 +331,32 @@ namespace _3.ShaderPreProcessor
 				_passesToStrip.Add(PassType.ScriptableRenderPipeline);
 				_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
 			}
-			
+
 			//Strip meta pass if rtGI isn't used
 			if (!Lightmapping.realtimeGI)
-			{  
+			{
 				_passesToStrip.Add(PassType.Meta);
 			}
-			
-			if(cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredLighting))
-            {
-	            _passesToStrip.Add(PassType.LightPrePassBase);
-	            _passesToStrip.Add(PassType.LightPrePassFinal);
-            }
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredLighting))
+			{
+				_passesToStrip.Add(PassType.LightPrePassBase);
+				_passesToStrip.Add(PassType.LightPrePassFinal);
+			}
 			else
 			{
 				_passesToStrip.Remove(PassType.LightPrePassBase);
 				_passesToStrip.Remove(PassType.LightPrePassFinal);
 			}
-            
-            if(cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredShading))
-            {
-	            _passesToStrip.Add(PassType.Deferred);
-            }
-            else
-            {
-	            _passesToStrip.Remove(PassType.Deferred);
-            }
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredShading))
+			{
+				_passesToStrip.Add(PassType.Deferred);
+			}
+			else
+			{
+				_passesToStrip.Remove(PassType.Deferred);
+			}
 
 			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.VertexLit))
 			{
