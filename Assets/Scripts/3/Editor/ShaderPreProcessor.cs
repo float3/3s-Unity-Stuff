@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
@@ -53,6 +54,20 @@ namespace _3.ShaderPreProcessor
 
 				foreach (string shaderpath in shaderpaths)
 				{
+					if (shaderpath.Contains("Reflect-BumpVertexLit.shader"))
+					{
+						string[] excludedShaderPass = new string[3];
+
+						excludedShaderPass[0] = "Reflective/Bumped Unlit";
+						excludedShaderPass[1] = "BASE";
+						excludedShaderPass[2] = "Legacy Shaders/Reflective/Bumped VertexLit";
+					}
+
+					if (shaderpath.Contains("unity_builtin_extra"))
+					{
+						continue;
+					}
+
 					string[] shader = File.ReadAllLines(shaderpath);
 
 					foreach (string line in new CommentFreeIterator(shader))
@@ -92,13 +107,27 @@ namespace _3.ShaderPreProcessor
 			{
 				foreach (Material material in renderer.sharedMaterials)
 				{
+					if (material.shader.name == "Legacy Shaders/Reflective/Bumped VertexLit")
+					{
+						string[] excludedShaderPass = new string[3];
+
+						excludedShaderPass[0] = "Reflective/Bumped Unlit";
+						excludedShaderPass[1] = "BASE";
+						excludedShaderPass[2] = "Legacy Shaders/Reflective/Bumped VertexLit";
+					}
+
+					if (AssetDatabase.GetAssetPath(material.shader).Contains("unity_builtin_extra"))
+					{
+						continue;
+					}
+
 					string[] shader = File.ReadAllLines(AssetDatabase.GetAssetPath(material.shader));
 
 					foreach (string line in new CommentFreeIterator(shader))
 					{
 						if (line.Contains("UsePass"))
 						{
-							string shadernameRegex = "(?<=\\\")(.*)(?=\\/)";
+							string shadernameRegex = "(?<=\")(.*)(?=\\/)";
 							string passnameRegex = "(?<=\\/)(.*?)(?=\")";
 
 							string[] excludedShaderPass = new string[3];
@@ -117,11 +146,12 @@ namespace _3.ShaderPreProcessor
 		}
 	}
 
-	#else
+#else
+	
 	class OnBuild : IPreprocessBuildWithReport
 	{
-
 		public int callbackOrder => 3;
+
 		public void OnPreprocessBuild(BuildReport report)
 		{
 			Scene scene = SceneManager.GetActiveScene();
@@ -133,6 +163,20 @@ namespace _3.ShaderPreProcessor
 
 			foreach (string shaderpath in shaderpaths)
 			{
+				if (shaderpath.Contains("Reflect-BumpVertexLit.shader"))
+				{
+					string[] excludedShaderPass = new string[3];
+
+					excludedShaderPass[0] = "Reflective/Bumped Unlit";
+					excludedShaderPass[1] = "BASE";
+					excludedShaderPass[2] = "Legacy Shaders/Reflective/Bumped VertexLit";
+				}
+
+				if (shaderpath.Contains("unity_builtin_extra"))
+				{
+					continue;
+				}
+
 				string[] shader = File.ReadAllLines(shaderpath);
 
 				foreach (string line in new CommentFreeIterator(shader))
@@ -170,8 +214,7 @@ namespace _3.ShaderPreProcessor
 		{
 			#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 
-			
-			
+
 			//Strip Post Processing
 			string shaderName = shader.name;
 			shaderName = string.IsNullOrEmpty(shaderName) ? "Empty" : shaderName;
@@ -188,8 +231,8 @@ namespace _3.ShaderPreProcessor
 			{
 				return;
 			}
-			
-			
+
+
 			//VRC is BIRP, Forward shading so strip SRP passes
 			//Deferred is kept if the scene has any cameras using deferred rendering
 			Camera[] cameras = Object.FindObjectsOfType<Camera>();
@@ -234,8 +277,6 @@ namespace _3.ShaderPreProcessor
 			{
 				_passesToStrip.Add(PassType.Meta);
 			}
-
-
 
 
 			//not sure how Vertex and VertexLM work so they are unhandled
