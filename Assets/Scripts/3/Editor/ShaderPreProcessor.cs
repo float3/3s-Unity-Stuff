@@ -1,4 +1,4 @@
-﻿#if UNITY_EDITOR
+#if UNITY_EDITOR
 
 #region
 
@@ -10,15 +10,19 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEditor;
 using UnityEditor.Build;
+using UnityEditor.Build.Reporting;
 using UnityEditor.Rendering;
 using UnityEngine;
 using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using VRC.SDKBase.Editor.BuildPipeline;
+using Object = UnityEngine.Object;
 
 #endregion
 
 // thank you Scruffy, z3y and TCL
+// ah I'm not happy with this script it's gotten way to overengineered I think
+// Welp this should take care of most false positive strips hopefully
 
 // ReSharper disable once CheckNamespace
 namespace _3.ShaderPreProcessor
@@ -50,6 +54,20 @@ namespace _3.ShaderPreProcessor
 
 				foreach (string shaderpath in shaderpaths)
 				{
+					if (shaderpath.Contains("Reflect-BumpVertexLit.shader"))
+					{
+						string[] excludedShaderPass = new string[3];
+
+						excludedShaderPass[0] = "Reflective/Bumped Unlit";
+						excludedShaderPass[1] = "BASE";
+						excludedShaderPass[2] = "Legacy Shaders/Reflective/Bumped VertexLit";
+					}
+
+					if (shaderpath.Contains("unity_builtin_extra"))
+					{
+						continue;
+					}
+
 					string[] shader = File.ReadAllLines(shaderpath);
 
 					foreach (string line in new CommentFreeIterator(shader))
@@ -57,7 +75,7 @@ namespace _3.ShaderPreProcessor
 						if (line.Contains("UsePass"))
 						{
 							string shadernameRegex = "(?<=\\\")(.*)(?=\\/)";
-							string passnameRegex = "(?<=\\/)(.*?)(?=\")";
+							string passnameRegex = "(?<=\\/)([^\\/]*?)(?=\")";
 
 							string[] excludedShaderPass = new string[3];
 
@@ -89,14 +107,28 @@ namespace _3.ShaderPreProcessor
 			{
 				foreach (Material material in renderer.sharedMaterials)
 				{
+					if (material.shader.name == "Legacy Shaders/Reflective/Bumped VertexLit")
+					{
+						string[] excludedShaderPass = new string[3];
+
+						excludedShaderPass[0] = "Reflective/Bumped Unlit";
+						excludedShaderPass[1] = "BASE";
+						excludedShaderPass[2] = "Legacy Shaders/Reflective/Bumped VertexLit";
+					}
+
+					if (AssetDatabase.GetAssetPath(material.shader).Contains("unity_builtin_extra"))
+					{
+						continue;
+					}
+
 					string[] shader = File.ReadAllLines(AssetDatabase.GetAssetPath(material.shader));
 
 					foreach (string line in new CommentFreeIterator(shader))
 					{
 						if (line.Contains("UsePass"))
 						{
-							string shadernameRegex = "(?<=\\\")(.*)(?=\\/)";
-							string passnameRegex = "(?<=\\/)(.*?)(?=\")";
+							string shadernameRegex = "(?<=\")(.*)(?=\\/)";
+							string passnameRegex = "(?<=\\/)([^\\/]*?)(?=\")";
 
 							string[] excludedShaderPass = new string[3];
 
@@ -117,8 +149,8 @@ namespace _3.ShaderPreProcessor
 	#else
 	class OnBuild : IPreprocessBuildWithReport
 	{
-
 		public int callbackOrder => 3;
+
 		public void OnPreprocessBuild(BuildReport report)
 		{
 			Scene scene = SceneManager.GetActiveScene();
@@ -130,6 +162,20 @@ namespace _3.ShaderPreProcessor
 
 			foreach (string shaderpath in shaderpaths)
 			{
+				if (shaderpath.Contains("Reflect-BumpVertexLit.shader"))
+				{
+					string[] excludedShaderPass = new string[3];
+
+					excludedShaderPass[0] = "Reflective/Bumped Unlit";
+					excludedShaderPass[1] = "BASE";
+					excludedShaderPass[2] = "Legacy Shaders/Reflective/Bumped VertexLit";
+				}
+
+				if (shaderpath.Contains("unity_builtin_extra"))
+				{
+					continue;
+				}
+
 				string[] shader = File.ReadAllLines(shaderpath);
 
 				foreach (string line in new CommentFreeIterator(shader))
@@ -137,7 +183,7 @@ namespace _3.ShaderPreProcessor
 					if (line.Contains("UsePass"))
 					{
 						string shadernameRegex = "(?<=\\\")(.*)(?=\\/)";
-						string passnameRegex = "(?<=\\/)(.*?)(?=\")";
+						string passnameRegex = "(?<=\\/)([^\\/]*?)(?=\")";
 
 						string[] excludedShaderPass = new string[3];
 
@@ -167,21 +213,6 @@ namespace _3.ShaderPreProcessor
 		{
 			#if VRC_SDK_VRCSDK2 || VRC_SDK_VRCSDK3
 
-			//VRC is BIRP, Forward shading so strip all deferred and SRP passes
-			//NOTE: I guess you can use deferred with a Camera set to deferred
-			_passesToStrip.Add(PassType.Deferred);
-			_passesToStrip.Add(PassType.LightPrePassBase);
-			_passesToStrip.Add(PassType.LightPrePassFinal);
-			_passesToStrip.Add(PassType.ScriptableRenderPipeline);
-			_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
-
-			//META Pass is only used in Editor, for lightmapping, and for realtimeGI from my understanding so strip if it's a Scene with rtGI enabled 
-			if (OnBuildRequest.RequestedBuildTypeCallback == VRCSDKRequestedBuildType.Avatar ||
-			    !Lightmapping.realtimeGI)
-			{
-				_passesToStrip.Add(PassType.Meta);
-			}
-
 
 			//Strip Post Processing
 			string shaderName = shader.name;
@@ -192,9 +223,62 @@ namespace _3.ShaderPreProcessor
 				return;
 			}
 
-			//not sure how Vertex and VertexLM work so they are unhandled
-			//from my understanding they can be used even if the RenderingPath is not Vertex
+			//this is a precaution since this audiolink shader might soon use a Vertex Pass
+			//so I want to make sure to never strip this shader
+			//but this shouldn't happen since the AudioLink camera should be then also be set to Vertex
+			if (shaderName.Contains("AudioLink/Internal/AudioTextureExport"))
+			{
+				return;
+			}
+
+
+			//VRC is BIRP, Forward shading so strip SRP passes
+			//Deferred is kept if the scene has any cameras using deferred rendering
+			Camera[] cameras = Object.FindObjectsOfType<Camera>();
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredLighting))
+			{
+				_passesToStrip.Add(PassType.LightPrePassBase);
+				_passesToStrip.Add(PassType.LightPrePassFinal);
+			}
+			else
+			{
+				_passesToStrip.Remove(PassType.LightPrePassBase);
+				_passesToStrip.Remove(PassType.LightPrePassFinal);
+			}
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredShading))
+			{
+				_passesToStrip.Add(PassType.Deferred);
+			}
+			else
+			{
+				_passesToStrip.Remove(PassType.Deferred);
+			}
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.VertexLit))
+			{
+				_passesToStrip.Add(PassType.Vertex);
+				_passesToStrip.Add(PassType.VertexLM);
+			}
+			else
+			{
+				_passesToStrip.Remove(PassType.Vertex);
+				_passesToStrip.Remove(PassType.VertexLM);
+			}
+
+			_passesToStrip.Add(PassType.ScriptableRenderPipeline);
+			_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
+
+			//META Pass is only used in Editor, for lightmapping, and for realtimeGI from my understanding so strip if it's a Scene with rtGI enabled 
+			if (OnBuildRequest.RequestedBuildTypeCallback == VRCSDKRequestedBuildType.Avatar ||
+			    !Lightmapping.realtimeGI)
+			{
+				_passesToStrip.Add(PassType.Meta);
+			}
+
 			#else
+			//from my understanding they can be used even if the RenderingPath is not Vertex
 			BuildTargetGroup buildTargetGroup =
 				BuildPipeline.GetBuildTargetGroup(EditorUserBuildSettings.activeBuildTarget);
 
@@ -202,19 +286,19 @@ namespace _3.ShaderPreProcessor
 			TierSettings tierSettings = EditorGraphicsSettings.GetTierSettings(buildTargetGroup, GraphicsTier.Tier3);
 
 			RenderingPath renderingPath = tierSettings.renderingPath;
-			
+
 			//Strip passes incompatible with the current rendering path
 			if (renderingPath == RenderingPath.Forward)
 			{
 				_passesToStrip.Add(PassType.Deferred);
-				
+
 				_passesToStrip.Add(PassType.LightPrePassFinal);
 				_passesToStrip.Add(PassType.LightPrePassBase);
 			}
 			else if (renderingPath == RenderingPath.DeferredLighting)
 			{
 				_passesToStrip.Add(PassType.Deferred);
-				
+
 				_passesToStrip.Add(PassType.ForwardBase);
 				_passesToStrip.Add(PassType.ForwardAdd);
 			}
@@ -222,7 +306,7 @@ namespace _3.ShaderPreProcessor
 			{
 				_passesToStrip.Add(PassType.LightPrePassFinal);
 				_passesToStrip.Add(PassType.LightPrePassBase);
-				
+
 				_passesToStrip.Add(PassType.ForwardBase);
 				_passesToStrip.Add(PassType.ForwardAdd);
 			}
@@ -235,7 +319,8 @@ namespace _3.ShaderPreProcessor
 				{
 					//
 				}
-				else if (string.IsNullOrEmpty(renderPipelineName) || renderPipelineName.Contains("HDRenderPipeline") || renderPipelineName.Contains("LightWeight") || renderPipelineName.Contains("Universal"))
+				else if (string.IsNullOrEmpty(renderPipelineName) || renderPipelineName.Contains("HDRenderPipeline") ||
+				         renderPipelineName.Contains("LightWeight") || renderPipelineName.Contains("Universal"))
 				{
 					_passesToStrip.Add(PassType.ScriptableRenderPipeline);
 					_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
@@ -246,12 +331,44 @@ namespace _3.ShaderPreProcessor
 				_passesToStrip.Add(PassType.ScriptableRenderPipeline);
 				_passesToStrip.Add(PassType.ScriptableRenderPipelineDefaultUnlit);
 			}
-			
+
 			//Strip meta pass if rtGI isn't used
 			if (!Lightmapping.realtimeGI)
-			{  
+			{
 				_passesToStrip.Add(PassType.Meta);
 			}
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredLighting))
+			{
+				_passesToStrip.Add(PassType.LightPrePassBase);
+				_passesToStrip.Add(PassType.LightPrePassFinal);
+			}
+			else
+			{
+				_passesToStrip.Remove(PassType.LightPrePassBase);
+				_passesToStrip.Remove(PassType.LightPrePassFinal);
+			}
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.DeferredShading))
+			{
+				_passesToStrip.Add(PassType.Deferred);
+			}
+			else
+			{
+				_passesToStrip.Remove(PassType.Deferred);
+			}
+
+			if (cameras.All(camera => camera.actualRenderingPath != RenderingPath.VertexLit))
+			{
+				_passesToStrip.Add(PassType.Vertex);
+				_passesToStrip.Add(PassType.VertexLM);
+			}
+			else
+			{
+				_passesToStrip.Remove(PassType.Vertex);
+				_passesToStrip.Remove(PassType.VertexLM);
+			}
+
 
 			#endif
 
