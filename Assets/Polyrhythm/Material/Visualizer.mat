@@ -20,7 +20,7 @@ Material:
     serializedVersion: 3
     m_TexEnvs: []
     m_Floats:
-    - _Root: 1.8765776
+    - _Root: 0.859375
     - _hasFifth: 0
     - _hasFourth: 0
     - _hasMajSecond: 0

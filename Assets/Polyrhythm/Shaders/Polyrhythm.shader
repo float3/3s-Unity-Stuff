@@ -118,7 +118,9 @@ Shader "Polyrhythm/Audio"
 				// KICK
 
 				// sine that drops to 0 freq
-				float k = sin(80. * exp(-tm * 10.));
+				//float k = sin(80. * exp(-tm * 10.));
+				float k = sin(tm * UNITY_TWO_PI);
+
 				return k * .5;
 
 				k *= min(1., tm * 500.) * max(0., 1. - tm);
