@@ -5,7 +5,7 @@ using UdonSharp;
 using UnityEngine;
 using UnityEngine.UI;
 
- : UdonSharpBehaviour
+public class PolyrhythmController : UdonSharpBehaviour
 {
 	public Material _audio;
 	public Material _visualizer;
@@ -152,9 +152,7 @@ using UnityEngine.UI;
 
 		_currentRoot.text = root.ToString(CultureInfo.CurrentCulture) + " Hz";
 
-		_audio.SetFloat("_Root", (flo
-
-		t);
+		_audio.SetFloat("_Root", (float)root);
 		_visualizer.SetFloat("_Root", (float)root);
 	}
 }
