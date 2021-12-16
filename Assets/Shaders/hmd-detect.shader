@@ -321,7 +321,49 @@ float3 char5x7( int ch, float2 uv )
 
 			float4 frag(v2f i) : SV_Target
 			{
-				return float4(print5x7float(_ScreenParams.x / _ScreenParams.y, i.uv.xy,1,5),1);
+				float2 uv6 = (i.uv.xy * 6);
+				float print = 1;
+				int wholecount = 1;
+				int decimalcount = 1;
+				switch ((int)uv6.y)
+				{
+				case 5:
+					print = _ScreenParams.x;
+					wholecount = 4;
+					decimalcount = 2;
+					break;
+				case 4:
+					print = _ScreenParams.y;
+					wholecount = 4;
+					decimalcount = 2;
+					break;
+				case 3:
+					print = _ScreenParams.z;
+					wholecount = 4;
+					decimalcount = 2;
+					break;
+				case 2:
+					print = _ScreenParams.w;
+					wholecount = 4;
+					decimalcount = 2;
+					break;
+				case 1:
+					print = _ScreenParams.x / _ScreenParams.y;
+					decimalcount = 5;
+					wholecount = 1;
+					break;
+				case 0:
+					print = 2.0 * atan(1.0 / unity_CameraProjection._m11) * 180.0 / UNITY_PI;
+					wholecount = 3;
+					decimalcount = 1;
+					break;
+				default:
+					print = 0;
+					wholecount = 1;
+					decimalcount = 0;
+					break;
+				}
+				return float4(print5x7float(print, float2(i.uv.x, uv6.y), wholecount, decimalcount), 1);
 			}
 			ENDCG
 		}

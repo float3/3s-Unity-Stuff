@@ -1,5 +1,4 @@
-﻿using System;
-using System.Globalization;
+﻿using System.Globalization;
 using TMPro;
 using UdonSharp;
 using UnityEngine;
@@ -24,11 +23,14 @@ public class PolyrhythmController : UdonSharpBehaviour
 	public Toggle _majSeventh;
 	public Toggle _octave;
 
+	public Toggle _mode;
+
 	public Slider _rootFreq;
+	public Slider _volume;
 
 	public TextMeshProUGUI _currentChord;
-
 	public TextMeshProUGUI _currentRoot;
+	public TextMeshProUGUI _currentMode;
 
 
 	void Start()
@@ -52,6 +54,7 @@ public class PolyrhythmController : UdonSharpBehaviour
 		_audio.SetFloat("_hasMinSeventh", _minSeventh.isOn ? 1 : 0);
 		_audio.SetFloat("_hasMajSeventh", _majSeventh.isOn ? 1 : 0);
 		_audio.SetFloat("_hasOctave", _octave.isOn ? 1 : 0);
+		_audio.SetFloat("_polyrhythm", _mode.isOn ? 1 : 0);
 
 		_visualizer.SetFloat("_hasRoot", _root.isOn ? 1 : 0);
 		_visualizer.SetFloat("_hasMinSecond", _minSecond.isOn ? 1 : 0);
@@ -68,6 +71,12 @@ public class PolyrhythmController : UdonSharpBehaviour
 		_visualizer.SetFloat("_hasOctave", _octave.isOn ? 1 : 0);
 
 		_currentChord.text = GetChordName();
+	}
+
+	public void _Mode()
+	{
+		_audio.SetFloat("_Polyrhythm", _mode.isOn ? 1 : 0);
+		_currentMode.text = _mode.isOn ? "Polyrhythm" : "Sine";
 	}
 
 	private string GetChordName()
@@ -145,14 +154,18 @@ public class PolyrhythmController : UdonSharpBehaviour
 	}
 */
 
+	public void _VolumeChanged()
+	{
+		_audio.SetFloat("_Volume", _volume.value);
+	}
 
 	public void _RootChanged()
 	{
-		double root = 0.859375 * Math.Pow(2, _rootFreq.value * 10);
+		float root = 0.859375f * Mathf.Pow(2, _rootFreq.value * 10);
 
 		_currentRoot.text = root.ToString(CultureInfo.CurrentCulture) + " Hz";
 
-		_audio.SetFloat("_Root", (float)root);
-		_visualizer.SetFloat("_Root", (float)root);
+		_audio.SetFloat("_Root", root);
+		_visualizer.SetFloat("_Root", root);
 	}
 }

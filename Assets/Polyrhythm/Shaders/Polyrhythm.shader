@@ -25,8 +25,8 @@ Shader "Polyrhythm/Audio"
 		[ToggleUI] _hasMinSeventh( "_hasMinSeventh", float) = 0
 		[ToggleUI] _hasMajSeventh( "_hasMajSeventh", float) = 0
 		[ToggleUI] _hasOctave( "_hasOctave", float) = 0
-		//[ToggleUI] _PolyRhythm( "PolyRhythm", float) = 0
-		//_Tempo ( "Tempo", float) = 0.001
+		[ToggleUI] _Polyrhythm( "PolyRhythm", float) = 0
+		_Volume ( "Volume", float) = 0
 		_Root ( "Root", float) = 10
 	}
 	SubShader
@@ -85,8 +85,8 @@ Shader "Polyrhythm/Audio"
 			bool _hasMinSeventh;
 			bool _hasMajSeventh;
 			bool _hasOctave;
-			//bool _Polyrhythm;
-			//float _Tempo;
+			bool _Polyrhythm;
+			float _Volume;
 			float _Root;
 
 			#define MINSECOND 16.0/15.0 * _Root
@@ -109,20 +109,18 @@ Shader "Polyrhythm/Audio"
 			{
 				// https://www.shadertoy.com/view/3l23Rc
 
-				float tm = mod(time , 1/freq);
+				float tm = mod(time, 1/freq);
 				float phase = mod(freq * time, 1);
 
-
-
 				// TODO: add a toggle between polyrhythm mode and sine mode
-				if(_Root <= 27.5)
+				if (_Polyrhythm)
 				{
 					phase = tm;
 				}
-				
+
 				float k = sin(phase * UNITY_TWO_PI);
 
-				return k * .5;
+				return k * _Volume;
 			}
 
 
