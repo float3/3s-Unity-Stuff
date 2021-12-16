@@ -1,0 +1,41 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!21 &2100000
+Material:
+  serializedVersion: 6
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_Name: ShaderAudioTexture
+  m_Shader: {fileID: 10752, guid: 0000000000000000f000000000000000, type: 0}
+  m_ShaderKeywords: 
+  m_LightmapFlags: 4
+  m_EnableInstancingVariants: 0
+  m_DoubleSidedGI: 0
+  m_CustomRenderQueue: -1
+  stringTagMap: {}
+  disabledShaderPasses: []
+  m_SavedProperties:
+    serializedVersion: 3
+    m_TexEnvs:
+    - _MainTex:
+        m_Texture: {fileID: 8400000, guid: 7c28ecd8c64075745953b0c0e903c195, type: 2}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
+    m_Floats:
+    - _Root: 1
+    - _hasFifth: 0
+    - _hasFourth: 1
+    - _hasMajSecond: 0
+    - _hasMajSeventh: 0
+    - _hasMajSixth: 0
+    - _hasMajThird: 0
+    - _hasMinSecond: 0
+    - _hasMinSeventh: 0
+    - _hasMinSixth: 0
+    - _hasMinThird: 0
+    - _hasOctave: 0
+    - _hasRoot: 0
+    - _hasTritone: 0
+    m_Colors: []

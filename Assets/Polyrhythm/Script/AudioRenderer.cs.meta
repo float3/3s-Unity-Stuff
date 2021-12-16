@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 027e30415ac8b5e48be4edffd6e3011b
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - audioMaterial: {instanceID: 0}
+  - audioOrigin: {instanceID: 0}
+  - tempTexture: {instanceID: 0}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
