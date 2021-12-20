@@ -113,14 +113,56 @@ Shader "Polyrhythm/Audio"
 				float phase = mod(freq * time, 1);
 
 				// TODO: add a toggle between polyrhythm mode and sine mode
-				if (_Polyrhythm)
+				if (!_Polyrhythm)
 				{
-					phase = tm;
+					float k = sin(phase * UNITY_TWO_PI);
+					return k * _Volume;
 				}
 
-				float k = sin(phase * UNITY_TWO_PI);
+				float finetune = 1.8;
 
-				return k * _Volume;
+				// KICK
+
+				// sine that drops to 0 freq
+				float k = sin(80. * exp(-tm * finetune * 10.));
+				//return vec2(k) * .5;
+
+				// ramp up start, fixes glitch
+				k *= min(1., tm * 500.) * max(0., 1. - tm);
+				//return vec2(k) * .5;
+
+				// fade out the end
+				k *= exp(-tm * 10.);
+				//return vec2(k) * .5;
+
+				// add a little more bass complexity 
+				k *= cos(120.0 * exp(-tm * 2.));
+				//return vec2(k) * .5;
+
+				// SUB
+
+				// low freq
+				float s = sin(tm * 380.);
+				//return vec2(s) * .5;
+
+				// fade out
+				s *= exp(-tm * 1.5);
+				//return vec2(s) * .5;
+
+				// ramp up start (fixes glitch) and fade to 0
+				s *= min(1., tm * 100.) * max(0., .5 - tm);
+				//return vec2(s) * .5;
+
+				// add kick
+				s += k;
+				//return vec2(s) * .5;
+
+				// incrase volume at the end
+				s *= lerp(1., 7., tm * 2.);
+				//return vec2(s) * .5;
+
+				// add more kick
+				return (s + k) * _Volume;
 			}
 
 
