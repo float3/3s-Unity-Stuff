@@ -78,6 +78,11 @@ public class PolyrhythmController : UdonSharpBehaviour
 		_currentChord.text = GetChordName();
 	}
 
+	public void _Mode()
+	{
+		_audio.SetFloat("_Polyrhythm", _mode.isOn ? 1 : 0);
+	}
+
 	private string GetChordName()
 	{
 		string chordName = ""; //unused for now
