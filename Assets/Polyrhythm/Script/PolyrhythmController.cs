@@ -8,6 +8,7 @@ public class PolyrhythmController : UdonSharpBehaviour
 {
 	public Material _audio;
 	public Material _visualizer;
+	public Material _polyrhythm;
 
 	public Toggle _root;
 	public Toggle _minSecond;
@@ -28,9 +29,13 @@ public class PolyrhythmController : UdonSharpBehaviour
 	public Slider _rootFreq;
 	public Slider _volume;
 
+	public Slider _x;
+	public Slider _y;
+
+	public TextMeshProUGUI _currentPolyrhythm;
+
 	public TextMeshProUGUI _currentChord;
 	public TextMeshProUGUI _currentRoot;
-	public TextMeshProUGUI _currentMode;
 
 
 	void Start()
@@ -73,15 +78,9 @@ public class PolyrhythmController : UdonSharpBehaviour
 		_currentChord.text = GetChordName();
 	}
 
-	public void _Mode()
-	{
-		_audio.SetFloat("_Polyrhythm", _mode.isOn ? 1 : 0);
-		_currentMode.text = _mode.isOn ? "Polyrhythm" : "Sine";
-	}
-
 	private string GetChordName()
 	{
-		string chordName = "C";
+		string chordName = ""; //unused for now
 
 		if (_majThird.isOn)
 		{
@@ -95,7 +94,7 @@ public class PolyrhythmController : UdonSharpBehaviour
 					chordName += "/9";
 				}
 			}
-			else if (_minSixth.isOn) chordName += "aug"; //Caug
+			else if (_minSixth.isOn) chordName += "aug"; //aug
 			else chordName += "maj";
 		}
 
@@ -106,13 +105,13 @@ public class PolyrhythmController : UdonSharpBehaviour
 
 			if (_minSeventh.isOn)
 			{
-				chordName += "7"; // Cmin7
+				chordName += "7"; // min7
 				if (_Tritone.isOn)
 				{
-					chordName = "Cmin7b5"; // Cmin7b5
+					chordName = "min7b5"; // min7b5
 				}
 			}
-			else if (_majSeventh.isOn) chordName += "(maj7)"; // Cmin(maj7)
+			else if (_majSeventh.isOn) chordName += "(maj7)"; // min(maj7)
 		}
 		else if (_Fifth.isOn) chordName += "5"; // C5
 
@@ -157,6 +156,13 @@ public class PolyrhythmController : UdonSharpBehaviour
 	public void _VolumeChanged()
 	{
 		_audio.SetFloat("_Volume", _volume.value);
+	}
+
+	public void _PolyRhythmChanged()
+	{
+		_polyrhythm.SetFloat("_x", _x.value);
+		_polyrhythm.SetFloat("_y", _y.value);
+		_currentPolyrhythm.text = _x.value + ":" + _y.value;
 	}
 
 	public void _RootChanged()
