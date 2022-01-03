@@ -26,6 +26,7 @@
 
 			#define VALVE_INDEX 1440/1600
 			#define OCULUS_QUEST 1440/1600
+			#define OCULUS_QUEST_FOV 100
 
 			#define OCULUS_RIFT_S 1648/1774 //roughly
 			#define OCULUS_RIFT_S_VFOV 94.2 //roughly
