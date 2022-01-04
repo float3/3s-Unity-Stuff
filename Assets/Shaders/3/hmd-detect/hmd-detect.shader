@@ -97,13 +97,13 @@
 					break;
 				case 3:
 					print = _ScreenParams.z;
-					wholecount = 4;
-					decimalcount = 2;
+					wholecount = 1;
+					decimalcount = 5;
 					break;
 				case 2:
 					print = _ScreenParams.w;
-					wholecount = 4;
-					decimalcount = 2;
+					wholecount = 1;
+					decimalcount = 5;
 					break;
 				case 1:
 					print = _ScreenParams.x / _ScreenParams.y;
@@ -111,9 +111,9 @@
 					wholecount = 1;
 					break;
 				case 0:
-					print = 2.0 * atan(1.0 / unity_CameraProjection._m11) * 180.0 / UNITY_PI;
-					wholecount = 3;
-					decimalcount = 1;
+					print = unity_CameraProjection._m11;
+					wholecount = 1;
+					decimalcount = 5;
 					break;
 				default:
 					print = 0;
