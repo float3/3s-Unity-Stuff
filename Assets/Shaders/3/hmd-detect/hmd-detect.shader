@@ -9,48 +9,71 @@
 			#pragma vertex vert
 			#pragma fragment frag
 			#include "UnityCG.cginc"
-			#include "Assets/Polyrhythm/Shaders/FortyPixelPrint.cginc"
+			#include "Assets/Polyrhythm/Shader/FortyPixelPrint.cginc"
 
+			// https://vr-compare.com
+			// FOV should be stored as the unity_CameraProjection._m11 value instead of as the FOV value to avoid precision loss
 
 			#define FORTE_VFX1 253/230
 
+
 			#define OCULUS_RIFT_DK1 640/800
 
+
 			#define OCULUS_RIFT_DK2 960/1080
+
 			#define PLAYSTATION_VR 960/1080
 
+
 			#define HTC_VIVE 1080/1200
+
 			#define OCULUS_RIFT 1080/1200
+
 
 			#define OCULUS_GO 1280/1440
 
+
 			#define VALVE_INDEX 1440/1600
+
 			#define OCULUS_QUEST 1440/1600
-			#define OCULUS_QUEST_FOV 100
+
 
 			#define OCULUS_RIFT_S 1648/1774 //roughly
-			#define OCULUS_RIFT_S_VFOV 94.2 //roughly
+
 
 			#define PIMAX_ARTISAN 1700/1440
 
+
 			#define OCULUS_QUEST_2 1832/1920
+
 			#define PICO_NEO_3 1832/1920
+
 
 			#define HP_REVERB_G2 2160/2160
 
+
 			#define PIMAX_5K_SUPER 2560/1440
+
 			#define VRGINEERS_XTAL 2560/1440
 
+
 			#define HTC_VIVE_PRO_2 2448/2448
+
 			#define HTC_VIVE_FOCUS_3 2448/2448
+
 
 			#define ARPARA_VR 2560/2560
 
+
 			#define VARJO_AERO 2880/2720
 
+
 			#define PIMAX_VISION_8K_PLUS 3840/2160
+
 			#define PIMAX_VISION_8KX 3840/2160
+
 			#define VRGINEERS_XTAL_8k 3840/2160
+
 			#define PIMAX_REALITY_12K_QLED 5670/3240
 
 			struct appdata
@@ -77,13 +100,12 @@
 			}
 
 
-
 			float4 frag(v2f i) : SV_Target
 			{
 				float2 uv6 = (i.uv.xy * 6);
-				float print = 1;
-				int wholecount = 1;
-				int decimalcount = 1;
+				float print;
+				int wholecount;
+				int decimalcount;
 				switch ((int)uv6.y)
 				{
 				case 5:

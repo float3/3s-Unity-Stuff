@@ -2,25 +2,29 @@
 {
 	Properties
 	{
-		[ToggleUI] _hasRoot ( "Root", float) = 1.0
-		[ToggleUI] _hasMinSecond ( "MinSecond", float) = 0
-		[ToggleUI] _hasMajSecond ( "MajSecond", float) = 0
-		[ToggleUI] _hasMinThird ( "MinThird", float) = 0
-		[ToggleUI] _hasMajThird ( "MajThird", float) = 0
-		[ToggleUI] _hasFourth ( "Fourth", float) = 0
-		[ToggleUI] _hasTritone ( "Tritone", float) = 0
-		[ToggleUI] _hasFifth ( "Fifth", float) = 0
-		[ToggleUI] _hasMinSixth ( "MinSixth", float) = 0
-		[ToggleUI] _hasMajSixth ( "MajSixth", float) = 0
-		[ToggleUI] _hasMinSeventh( "MinSeventh", float) = 0
-		[ToggleUI] _hasMajSeventh( "MajSeventh", float) = 0
-		[ToggleUI] _hasOctave( "Octave", float) = 0
-		//[ToggleUI] _PolyRhythm( "PolyRhythm", float) = 0
-		//_Tempo ( "Tempo", float) = 0.001
+		[ToggleUI] _hasPrime ( "_hasPrime", float) = 1.0
+		[ToggleUI] _hasMinSecond ( "_hasMinSecond", float) = 0
+		[ToggleUI] _hasMajSecond ( "_hasMajSecond", float) = 0
+		[ToggleUI] _hasMinThird ( "_hasMinThird", float) = 0
+		[ToggleUI] _hasMajThird ( "_hasMajThird", float) = 1.0
+		[ToggleUI] _hasFourth ( "_hasFourth", float) = 0
+		[ToggleUI] _hasTritone ( "_hasTritone", float) = 0
+		[ToggleUI] _hasFifth ( "_hasFifth", float) = 1.0
+		[ToggleUI] _hasMinSixth ( "_hasMinSixth", float) = 0
+		[ToggleUI] _hasMajSixth ( "_hasMajSixth", float) = 0
+		[ToggleUI] _hasMinSeventh( "_hasMinSeventh", float) = 0
+		[ToggleUI] _hasMajSeventh( "_hasMajSeventh", float) = 0
+		[ToggleUI] _hasOctave( "_hasOctave", float) = 1.0
+		[ToggleUI] _Polyrhythm( "PolyRhythm", float) = 0
+		_Volume ( "Volume", float) = 0
 		_Root ( "Root", float) = 440
 	}
 	SubShader
 	{
+		Tags
+		{
+			"PreviewType"="Plane"
+		}
 		Pass
 		{
 			CGPROGRAM
@@ -41,12 +45,8 @@
 				float4 vertex : SV_POSITION;
 			};
 
-
-			// GLSL Compatability macros
 			#define glsl_mod(x,y) (((x)-(y)*floor((x)/(y))))
 
-
-			// Global access to uv data
 			static v2f vertex_output;
 
 			v2f vert(appdata v)
@@ -65,7 +65,8 @@
 			#define Y_AXIS_LIMIT 0.00005
 			#define DEBUG false
 			#define DEBUG_LIMIT 0.1
-			bool _hasRoot;
+
+			bool _hasPrime;
 			bool _hasMinSecond;
 			bool _hasMajSecond;
 			bool _hasMinThird;
@@ -78,8 +79,8 @@
 			bool _hasMinSeventh;
 			bool _hasMajSeventh;
 			bool _hasOctave;
-			//bool _Polyrhythm;
-			//float _Tempo;
+			bool _Polyrhythm;
+			float _Volume;
 			float _Root;
 
 			#define MINSECOND 16.0/15.0 * _Root
@@ -119,7 +120,7 @@
 				float majSeventh = sin(MAJSEVENTH * a * TWO_PI);
 				float octave = sin(OCTAVE * a * TWO_PI);
 				float amplitude = 0;
-				amplitude += _hasRoot ? root : 0.;
+				amplitude += _hasPrime ? root : 0.;
 				amplitude += _hasMinSecond ? minSecond : 0.;
 				amplitude += _hasMajSecond ? majSecond : 0.;
 				amplitude += _hasMinThird ? minThird : 0.;
@@ -150,82 +151,31 @@
 				float minSeventh = abs(sin(MINSEVENTH * a * TWO_PI));
 				float majSeventh = abs(sin(MAJSEVENTH * a * TWO_PI));
 				float octave = abs(sin(OCTAVE * a * TWO_PI));
-				if (_hasRoot && root
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasPrime && root > DEBUG_LIMIT)
 					return false;
-
-				if (_hasMinSecond && minSecond
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasMinSecond && minSecond > DEBUG_LIMIT)
 					return false;
-
-				if (_hasMajSecond && majSecond
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasMajSecond && majSecond > DEBUG_LIMIT)
 					return false;
-
-				if (_hasMinThird && minThird
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasMinThird && minThird > DEBUG_LIMIT)
 					return false;
-
-				if (_hasMajThird && majThird
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasMajThird && majThird > DEBUG_LIMIT)
 					return false;
-
-				if (_hasFourth && fourth
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasFourth && fourth > DEBUG_LIMIT)
 					return false;
-
-				if (_hasTritone && tritone
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasTritone && tritone > DEBUG_LIMIT)
 					return false;
-
-				if (_hasFifth && fifth
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasFifth && fifth > DEBUG_LIMIT)
 					return false;
-
-				if (_hasMinSixth && minSixth
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasMinSixth && minSixth > DEBUG_LIMIT)
 					return false;
-
-				if (_hasMajSixth && majSixth
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasMajSixth && majSixth > DEBUG_LIMIT)
 					return false;
-
-				if (_hasMinSeventh && minSeventh
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasMinSeventh && minSeventh > DEBUG_LIMIT)
 					return false;
-
-				if (_hasMajSeventh && majSeventh
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasMajSeventh && majSeventh > DEBUG_LIMIT)
 					return false;
-
-				if (_hasOctave && octave
-					>
-					DEBUG_LIMIT
-				)
+				if (_hasOctave && octave > DEBUG_LIMIT)
 					return false;
 
 				return true;
@@ -247,7 +197,7 @@
 				float majSeventh = sin(MAJSEVENTH * a * TWO_PI);
 				float octave = sin(OCTAVE * a * TWO_PI);
 				float cycle = 1.;
-				cycle *= _hasRoot ? root : 1.;
+				cycle *= _hasPrime ? root : 1.;
 				cycle *= _hasMinSecond ? minSecond : 1.;
 				cycle *= _hasMajSecond ? majSecond : 1.;
 				cycle *= _hasMinThird ? minThird : 1.;
@@ -282,7 +232,7 @@
 			float2 wave(float time)
 			{
 				float2 sound;
-				sound = _hasRoot ? kick(time, _Root) : float2(0.0, 0.0);
+				sound = _hasPrime ? kick(time, _Root) : float2(0.0, 0.0);
 				sound += _hasMinSecond ? kick(time, MINSECOND) : float2(0.0, 0.0);
 				sound += _hasMajSecond ? kick(time, MAJSECOND) : float2(0.0, 0.0);
 				sound += _hasMinThird ? kick(time, MINTHIRD) : float2(0.0, 0.0);
@@ -304,36 +254,27 @@
 			#define WHITE float4(1, 1, 1, 1)
 			#define BLACK float4(0, 0, 0, 1)
 
-			float4 frag(v2f __vertex_output) : SV_Target
+			float3 frag(v2f __vertex_output) : SV_Target
 			{
 				vertex_output = __vertex_output;
 				float2 fragCoord = vertex_output.uv * _ScreenParams.xy;
 				float2 uv = (fragCoord / _ScreenParams.xy - 0.5) * float2(X_AXIS_SCALE, Y_AXIS_SCALE);
-				float a = 1;
-				float r = 0;
-				float g = 0;
-				float b = 0;
-				
+				float3 col = 0;
+
 				if (abs(uv.x) <= Y_AXIS_LIMIT)
-					b = 1.;
+					col.b = 1;
 
 				if (abs(uv.y) <= X_AXIS_LIMIT)
-					g = 1.;
+					col.g = 1;
 
-				uv.x += _Time.y * 1/_Root;
-				float amplitudeSum = getAmplitude(uv.x);
+				uv.x += _Time.y * 1 / _Root;
+				float amplitudeSum = getAmplitude(uv.x) * _Volume;
 				if (abs(amplitudeSum - uv.y) <= SIN_LIMIT)
 				{
-					r = 1.;
-					g = 0.;
-					b = 0.;
+					col.xyz = float3(1,0,0); 
 				}
 
-
-
-
-				float4 fragColor = float4(r, g, b, a);
-				return fragColor;
+				return col;
 			}
 			ENDCG
 		}

@@ -22,7 +22,7 @@ Shader "Polyrhythm/Polyrhythm"
 			#pragma vertex vert
 			#pragma fragment frag
 			#include "UnityCG.cginc"
-			#include "Assets/Polyrhythm/Shaders/FortyPixelPrint.cginc"
+			#include "Assets/Polyrhythm/Shader/FortyPixelPrint.cginc"
 
 			struct appdata
 			{
@@ -67,7 +67,7 @@ Shader "Polyrhythm/Polyrhythm"
 				float3 a = 1;
 
 				//index = (int)uvGrid.x * (int)uvGrid.y;
-				int index = ((int)uvGrid.y - 1) * _x + (int)uvGrid.x;
+				uint index = ((int)uvGrid.y - 1) * _x + (int)uvGrid.x;
 
 				int places = 1;
 				if ((int)uvGrid.x >= 10)

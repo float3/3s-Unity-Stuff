@@ -20,18 +20,20 @@ Material:
     serializedVersion: 3
     m_TexEnvs: []
     m_Floats:
-    - _Root: 0.859375
-    - _hasFifth: 0
+    - _Polyrhythm: 0
+    - _Root: 440
+    - _Volume: 0
+    - _hasFifth: 1
     - _hasFourth: 0
     - _hasMajSecond: 0
     - _hasMajSeventh: 0
     - _hasMajSixth: 0
-    - _hasMajThird: 0
+    - _hasMajThird: 1
     - _hasMinSecond: 0
     - _hasMinSeventh: 0
     - _hasMinSixth: 0
     - _hasMinThird: 0
-    - _hasOctave: 0
-    - _hasRoot: 0
+    - _hasOctave: 1
+    - _hasPrime: 1
     - _hasTritone: 0
     m_Colors: []

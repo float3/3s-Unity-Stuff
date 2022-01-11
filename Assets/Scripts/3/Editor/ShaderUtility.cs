@@ -1,4 +1,11 @@
-﻿#if UNITY_EDITOR
+﻿/*
+Copyright 2018-2021 Lyuma
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the "Software"), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*/
+
+#if UNITY_EDITOR
 
 #region
 
@@ -11,17 +18,79 @@ using UnityEngine;
 
 #endregion
 
-// ReSharper disable once CheckNamespace
-namespace _3.FallBackDiffuseUtility
+namespace f3ShaderUtility
 {
-	public class FallBackUtility : EditorWindow
+	public class float3ShaderUtility : EditorWindow
 	{
+		public static readonly HashSet<string> BlackList = new HashSet<string>(new[]
+		{
+			"BILLBOARD_FACE_CAMERA_POS",
+			"EDITOR_VISUALIZATION",
+			"ETC1_EXTERNAL_ALPHA",
+			"FOG_EXP",
+			"FOG_EXP2",
+			"FOG_LINEAR",
+			"LOD_FADE_CROSSFADE",
+			"OUTLINE_ON",
+			"SHADOWS_SHADOWMASK",
+			"SOFTPARTICLES_ON",
+			"STEREO_INSTANCING_ON",
+			"STEREO_MULTIVIEW_ON",
+			"UNITY_HDR_ON",
+			"UNITY_SINGLE_PASS_STEREO",
+			"_EMISSION",
+			"VERTEXLIGHT_ON",
+			"UNDERLAY_ON",
+			"UNDERLAY_INNER",
+			"APPLY_FORWARD_FOG",
+			"AUTO_EXPOSURE",
+			"BLOOM",
+			"BLOOM_LOW",
+			"CHROMATIC_ABERRATION",
+			"CHROMATIC_ABERRATION_LOW",
+			"COLOR_GRADING_HDR",
+			"COLOR_GRADING_HDR_2D",
+			"COLOR_GRADING_HDR_3D",
+			"COLOR_GRADING_LDR_2D",
+			"DISTORT",
+			"FINALPASS",
+			"FOG_EXP",
+			"FOG_EXP2",
+			"FOG_LINEAR",
+			"FXAA",
+			"FXAA_KEEP_ALPHA",
+			"FXAA_LOW",
+			"FXAA_NO_ALPHA",
+			"GRAIN",
+			"SOURCE_GBUFFER",
+			"STEREO_DOUBLEWIDE_TARGET",
+			"STEREO_INSTANCING_ENABLED",
+			"TONEMAPPING_ACES",
+			"TONEMAPPING_CUSTOM",
+			"TONEMAPPING_NEUTRAL",
+			"VIGNETTE",
+		});
+
+		public static bool IsInBlacklist(string inputStr)
+		{
+			foreach (string item in BlackList)
+			{
+				if (inputStr.Contains(item))
+				{
+					return true;
+				}
+			}
+
+			return false;
+		}
+
+
 		[MenuItem("Tools/3/ReplaceFallBackDiffuse", false, 990)]
 		private static void ReplaceFallBackDiffuse()
 		{
 			if (EditorUtility.DisplayDialog("Replace FallBack \"Diffuse\" ?",
-				"Are you sure you want to replace FallBack \"Diffuse\" with FallBack \"Standard\" in all shaders in your Project?",
-				"Yes", "No"))
+				    "Are you sure you want to replace FallBack \"Diffuse\" with FallBack \"Standard\" in all shaders in your Project?",
+				    "Yes", "No"))
 			{
 				ShaderInfo[] shaders = ShaderUtil.GetAllShaderInfo();
 
@@ -42,6 +111,32 @@ namespace _3.FallBackDiffuseUtility
 			}
 		}
 
+		[MenuItem("Tools/3/Convert global Shader Keywords to locals", false, 990)]
+		private static void ConvertKeywords()
+		{
+			if (EditorUtility.DisplayDialog("Replace global Shader Keywords ?",
+				    "Are you sure you want to replace global Shader Features and Multi Compiles with local ones in all shaders in your Project? Use at your own Risk.",
+				    "Yes", "No"))
+			{
+				ShaderInfo[] shaders = ShaderUtil.GetAllShaderInfo();
+
+				foreach (ShaderInfo shaderinfo in shaders)
+				{
+					Shader shader = Shader.Find(shaderinfo.name);
+					if (AssetDatabase.GetAssetPath(shader).StartsWith("Assets") ||
+					    AssetDatabase.GetAssetPath(shader).StartsWith("Packages"))
+					{
+						if (FindGlobalShaderKeywords(shader))
+						{
+							ReplaceGlobals(shader);
+						}
+					}
+				}
+
+				AssetDatabase.Refresh();
+			}
+		}
+
 
 		public static void ReplaceFallBack(Shader shader)
 		{
@@ -52,7 +147,7 @@ namespace _3.FallBackDiffuseUtility
 			string[] lines = File.ReadAllLines(path);
 			int lineNum = -1;
 			string[] newLines = new string[lines.Length];
-			foreach (var unused in lines)
+			foreach (string line in lines)
 			{
 				lineNum++;
 				if (lineNum >= fallbackline &&
@@ -67,6 +162,66 @@ namespace _3.FallBackDiffuseUtility
 			}
 
 			File.WriteAllLines(path, newLines);
+		}
+
+		public static void ReplaceGlobals(Shader shader)
+		{
+			string path = AssetDatabase.GetAssetPath(shader);
+
+			string[] lines = File.ReadAllLines(path);
+			int lineNum = -1;
+			string[] newLines = new string[lines.Length];
+			foreach (string line in lines)
+			{
+				lineNum++;
+				if (line.Contains("shader_feature ") && !IsInBlacklist(line))
+				{
+					newLines[lineNum] = lines[lineNum].Replace("shader_feature ", "shader_feature_local ");
+				}
+				else if (line.Contains("multi_compile ") && !IsInBlacklist(line))
+				{
+					newLines[lineNum] = lines[lineNum].Replace("multi_compile ", "multi_compile_local ");
+				}
+				else
+				{
+					newLines[lineNum] = lines[lineNum];
+				}
+			}
+
+			File.WriteAllLines(path, newLines);
+		}
+
+		private static bool FindGlobalShaderKeywords(Shader shader)
+		{
+			if (shader.name.Contains("Hidden/PostProcessing")) return false;
+			string filePath = AssetDatabase.GetAssetPath(shader);
+			string[] shaderLines = File.ReadAllLines(filePath);
+			bool fallThrough = true;
+			foreach (string xline in new CommentFreeIterator(shaderLines))
+			{
+				string line = xline;
+				int lineSkip = 0;
+
+				while (fallThrough)
+				{
+					//Debug.Log("Looking for state " + state + " on line " + lineNum);
+					fallThrough = false;
+					lineSkip = 0; // ???
+				}
+
+				int global = line.IndexOf("shader_feature ", lineSkip, StringComparison.Ordinal);
+				if (global == -1)
+				{
+					global = line.IndexOf("multi_compile ", lineSkip, StringComparison.Ordinal);
+				}
+
+				if (global != -1 && !IsInBlacklist(line))
+				{
+					return true;
+				}
+			}
+
+			return false;
 		}
 
 		private static bool FindFallBackDiffuse(Shader shader)

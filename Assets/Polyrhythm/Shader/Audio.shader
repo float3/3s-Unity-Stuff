@@ -12,22 +12,22 @@ Shader "Polyrhythm/Audio"
 {
 	Properties
 	{
-		[ToggleUI] _hasRoot ( "_hasRoot", float) = 1.0
+		[ToggleUI] _hasPrime ( "_hasPrime", float) = 1.0
 		[ToggleUI] _hasMinSecond ( "_hasMinSecond", float) = 0
 		[ToggleUI] _hasMajSecond ( "_hasMajSecond", float) = 0
 		[ToggleUI] _hasMinThird ( "_hasMinThird", float) = 0
-		[ToggleUI] _hasMajThird ( "_hasMajThird", float) = 0
+		[ToggleUI] _hasMajThird ( "_hasMajThird", float) = 1.0
 		[ToggleUI] _hasFourth ( "_hasFourth", float) = 0
 		[ToggleUI] _hasTritone ( "_hasTritone", float) = 0
-		[ToggleUI] _hasFifth ( "_hasFifth", float) = 0
+		[ToggleUI] _hasFifth ( "_hasFifth", float) = 1.0
 		[ToggleUI] _hasMinSixth ( "_hasMinSixth", float) = 0
 		[ToggleUI] _hasMajSixth ( "_hasMajSixth", float) = 0
 		[ToggleUI] _hasMinSeventh( "_hasMinSeventh", float) = 0
 		[ToggleUI] _hasMajSeventh( "_hasMajSeventh", float) = 0
-		[ToggleUI] _hasOctave( "_hasOctave", float) = 0
+		[ToggleUI] _hasOctave( "_hasOctave", float) = 1.0
 		[ToggleUI] _Polyrhythm( "PolyRhythm", float) = 0
 		_Volume ( "Volume", float) = 0
-		_Root ( "Root", float) = 10
+		_Root ( "Root", float) = 440
 	}
 	SubShader
 	{
@@ -51,15 +51,16 @@ Shader "Polyrhythm/Audio"
 			uint _Offset;
 			static float2 _BufferSize = _ScreenParams.xy; // use render target size
 
-			struct FragInput
+			struct v2f
 			{
 				float2 tex : TEXCOORD0;
 				float4 pos : SV_Position;
 				UNITY_VERTEX_OUTPUT_STEREO
 			};
 
-			void vert(appdata_base i, out FragInput o)
+			v2f vert(appdata_base i)
 			{
+				v2f o;
 				UNITY_SETUP_INSTANCE_ID(i);
 				UNITY_INITIALIZE_VERTEX_OUTPUT_STEREO(o);
 				o.tex = i.texcoord;
@@ -67,12 +68,13 @@ Shader "Polyrhythm/Audio"
 				o.pos.y *= _ProjectionParams.x;
 				if (unity_OrthoParams.w != 1)
 					o.pos = 0;
+				return o;
 			}
 
 
 			#define mod(x,y) ((x)%(y))
 
-			bool _hasRoot;
+			bool _hasPrime;
 			bool _hasMinSecond;
 			bool _hasMajSecond;
 			bool _hasMinThird;
@@ -176,7 +178,7 @@ Shader "Polyrhythm/Audio"
 			float2 wave(float time)
 			{
 				float2 sound;
-				sound = _hasRoot ? instrument(time, _Root) : float2(0.0, 0.0);
+				sound = _hasPrime ? instrument(time, _Root) : float2(0.0, 0.0);
 				sound += _hasMinSecond ? instrument(time, MINSECOND) : float2(0.0, 0.0);
 				sound += _hasMajSecond ? instrument(time, MAJSECOND) : float2(0.0, 0.0);
 				sound += _hasMinThird ? instrument(time, MINTHIRD) : float2(0.0, 0.0);
@@ -198,7 +200,7 @@ Shader "Polyrhythm/Audio"
 			}
 
 
-			float2 frag(FragInput i) : SV_Target
+			float2 frag(v2f i) : SV_Target
 			{
 				uint bufferLen = _BufferSize.x * _BufferSize.y;
 				uint index = dot(floor(i.tex.xy * _BufferSize.xy), float2(1, _BufferSize.x));

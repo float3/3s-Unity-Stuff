@@ -171,19 +171,19 @@ float3 char5x7( int ch, float2 uv )
 #endif
 
 
-float3 print5x7int( int num, float2 uv, int places, int leadzero )
+float3 print5x7int( int num, float2 uv, uint places, int leadzero )
 {
     float2 cuv = uv*float2( places, 1. );
     float2 luv = cuv*float2( 6, 8. );
     uint2 iuv = uint2( luv );
-    int posi = int(iuv.x)/6;
-    int marknegat = -1;
+    uint posi = uint(iuv.x)/6;
+    uint marknegat = -1;
     if( num < 0 )
     {
         marknegat = places-int(log(-float(num))/log(10.0))-2;
     }
     num = abs(num);
-    int nn = (num/calc_ipow10(places-posi-1));
+    uint nn = (num/calc_ipow10(places-posi-1));
     if( posi == marknegat )
         nn = -3;
     else if( nn <= 0 && posi != places-1)
@@ -200,22 +200,22 @@ float3 print5x7intzl( int num, float2 uv, int places )
     float2 cuv = uv*float2( places, 1. );
     float2 luv = cuv*float2( 6, 8. );
     uint2 iuv = uint2( luv );
-    int posi = int(iuv.x)/6;
-    int nn = (num/calc_ipow10(places-posi-1));
+    uint posi = uint(iuv.x)/6;
+    uint nn = (num/calc_ipow10(places-posi-1));
     nn %= 10;
     int ch = nn+48-32;
     return char5x7( ch, frac(cuv)*float2(6.,8.) );
 }
 
-float3 print5x7float( float num, float2 uv, int wholecount, int decimalcount )
+float3 print5x7float( float num, float2 uv, uint wholecount, int decimalcount )
 {
     float2 cuv = uv*float2( wholecount+decimalcount+1, 1. );
     float2 luv = cuv*float2( 6, 8. );
     uint2 iuv = uint2( luv );
-    int posi = int(iuv.x)/6;
-    int nn = -2;
+    uint posi = uint(iuv.x)/6;
+    uint nn = -2;
     
-    int marknegat = -1;
+    uint marknegat = -1;
     if( num < 0.0 )
     {
         marknegat = wholecount-2-int(log(-num)/log(10.0));
@@ -223,13 +223,13 @@ float3 print5x7float( float num, float2 uv, int wholecount, int decimalcount )
     
     num = abs(num);
     num +=  pow(.1f,float(decimalcount))*.499;
-    int nv = int( num );
+    uint nv = int( num );
     
     if( posi < wholecount )
     {
         int wholediff = posi - wholecount+1;
         float v = (pow( 10.0 , float(wholediff)));
-        int ni = int( float(nv) * v);
+        uint ni = int( float(nv) * v);
         if( posi == marknegat ) nn = -3;
         else if( ni <= 0 && wholediff != 0 ) nn = -16; //Blank out.
         else         nn = ni%10;

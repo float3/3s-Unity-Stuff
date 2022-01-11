@@ -8,6 +8,7 @@ public class PolyrhythmController : UdonSharpBehaviour
 {
 	public Material _audio;
 	public Material _visualizer;
+	public Material _LCM;
 	public Material _polyrhythm;
 
 	public Toggle _root;
@@ -44,9 +45,27 @@ public class PolyrhythmController : UdonSharpBehaviour
 			"https://www.shadertoy.com/view/7tV3WV \n https://www.youtube.com/watch?v=-tRAkWaeepg \n https://www.youtube.com/watch?v=JiNKlhspdKg \n https://www.youtube.com/watch?v=_gCJHNBEdoc \n https://www.youtube.com/watch?v=n9l7HqhJugA");
 	}
 
+	// void setFloats(Material m)
+	// {
+	// 	m.SetFloat("_hasPrime", _root.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasMinSecond", _minSecond.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasMajSecond", _majSecond.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasMinThird", _minThird.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasMajThird", _majThird.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasFourth", _Fourth.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasTritone", _Tritone.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasFifth", _Fifth.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasMinSixth", _minSixth.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasMajSixth", _majSixth.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasMinSeventh", _minSeventh.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasMajSeventh", _majSeventh.isOn ? 1 : 0);
+	// 	m.SetFloat("_hasOctave", _octave.isOn ? 1 : 0);
+	// 	m.SetFloat("_polyrhythm", _mode.isOn ? 1 : 0);
+	// }
+
 	public void _Polyrhythm()
 	{
-		_audio.SetFloat("_hasRoot", _root.isOn ? 1 : 0);
+		_audio.SetFloat("_hasPrime", _root.isOn ? 1 : 0);
 		_audio.SetFloat("_hasMinSecond", _minSecond.isOn ? 1 : 0);
 		_audio.SetFloat("_hasMajSecond", _majSecond.isOn ? 1 : 0);
 		_audio.SetFloat("_hasMinThird", _minThird.isOn ? 1 : 0);
@@ -61,7 +80,7 @@ public class PolyrhythmController : UdonSharpBehaviour
 		_audio.SetFloat("_hasOctave", _octave.isOn ? 1 : 0);
 		_audio.SetFloat("_polyrhythm", _mode.isOn ? 1 : 0);
 
-		_visualizer.SetFloat("_hasRoot", _root.isOn ? 1 : 0);
+		_visualizer.SetFloat("_hasPrime", _root.isOn ? 1 : 0);
 		_visualizer.SetFloat("_hasMinSecond", _minSecond.isOn ? 1 : 0);
 		_visualizer.SetFloat("_hasMajSecond", _majSecond.isOn ? 1 : 0);
 		_visualizer.SetFloat("_hasMinThird", _minThird.isOn ? 1 : 0);
@@ -74,6 +93,20 @@ public class PolyrhythmController : UdonSharpBehaviour
 		_visualizer.SetFloat("_hasMinSeventh", _minSeventh.isOn ? 1 : 0);
 		_visualizer.SetFloat("_hasMajSeventh", _majSeventh.isOn ? 1 : 0);
 		_visualizer.SetFloat("_hasOctave", _octave.isOn ? 1 : 0);
+
+		_LCM.SetFloat("_hasPrime", _root.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasMinSecond", _minSecond.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasMajSecond", _majSecond.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasMinThird", _minThird.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasMajThird", _majThird.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasFourth", _Fourth.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasTritone", _Tritone.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasFifth", _Fifth.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasMinSixth", _minSixth.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasMajSixth", _majSixth.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasMinSeventh", _minSeventh.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasMajSeventh", _majSeventh.isOn ? 1 : 0);
+		_LCM.SetFloat("_hasOctave", _octave.isOn ? 1 : 0);
 
 		_currentChord.text = GetChordName();
 	}
@@ -161,6 +194,7 @@ public class PolyrhythmController : UdonSharpBehaviour
 	public void _VolumeChanged()
 	{
 		_audio.SetFloat("_Volume", _volume.value);
+		_visualizer.SetFloat("_Volume", _volume.value);
 	}
 
 	public void _PolyRhythmChanged()

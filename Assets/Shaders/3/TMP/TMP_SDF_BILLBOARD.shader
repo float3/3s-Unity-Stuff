@@ -124,12 +124,12 @@ Shader "3/TMP_SDF/Billboarding"
             #pragma target 3.0
             #pragma vertex VertShader
             #pragma fragment PixShader
-            #pragma shader_feature __ BEVEL_ON
+            #pragma shader_feature_local __ BEVEL_ON
             #pragma shader_feature __ UNDERLAY_ON UNDERLAY_INNER
-            #pragma shader_feature __ GLOW_ON
+            #pragma shader_feature_local __ GLOW_ON
 
-            #pragma multi_compile __ UNITY_UI_CLIP_RECT
-            #pragma multi_compile __ UNITY_UI_ALPHACLIP
+            #pragma multi_compile_local __ UNITY_UI_CLIP_RECT
+            #pragma multi_compile_local __ UNITY_UI_ALPHACLIP
 
             #include "UnityCG.cginc"
             #include "UnityUI.cginc"
