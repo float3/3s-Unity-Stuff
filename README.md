@@ -13,4 +13,4 @@ Shaders:
 
 TensionMap.shader (WIP)
 
-various shaders I made/edited for friends
+various shaders i made/edited for friends
